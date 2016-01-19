@@ -3,6 +3,7 @@ import * as extend from 'extend';
 import { MetadataHandler } from './metadataHandler';
 import { Exception } from 'jaydata-error-handler';
 import { PromiseHandler } from 'jaydata-promise-handler';
+export { MetadataHandler } from './metadataHandler';
 
 export class ServiceParams{
 	public serviceUri:string

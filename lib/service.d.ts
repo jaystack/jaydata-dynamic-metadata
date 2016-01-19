@@ -1,4 +1,5 @@
 /// <reference path="../typings/tsd.d.ts" />
+export { MetadataHandler } from './metadataHandler';
 export declare class ServiceParams {
     serviceUri: string;
     config: any;

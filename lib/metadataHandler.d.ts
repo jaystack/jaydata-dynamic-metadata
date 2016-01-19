@@ -5,6 +5,7 @@ export declare class MetadataHandler {
     oData: any;
     private $data;
     constructor($data: any, options: any);
+    parse(text: string): any;
     load(): Promise<any>;
     private _createFactoryFunc(ctxType);
     private _appendBasicAuth(request, user, password, withCredentials);

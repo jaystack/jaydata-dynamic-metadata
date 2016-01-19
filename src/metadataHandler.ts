@@ -20,6 +20,19 @@ export class MetadataHandler{
             this.oData = odatajs.oData
         }
 	}
+	parse(text:string):any {
+		var edmMetadata = new Edm.Edmx(this.oData.metadata.metadataParser(null, text));
+		var metadata = new Metadata(this.$data, this.options, edmMetadata);
+		var types = metadata.processMetadata();
+
+		var contextType = types.filter((t)=> t.isAssignableTo(this.$data.EntityContext))[0];
+
+		var factory = this._createFactoryFunc(contextType);
+		factory.type = contextType;
+		factory.src = types.src;
+
+		return factory;
+	}
 	load():Promise<any>{
 		var self = this;
 		return new Promise<any>(function(resolve, reject){
