@@ -46,10 +46,10 @@ export class DynamicMetadata{
 		}
 
 		var pHandler = new PromiseHandler();
-    	var _callback = pHandler.createCallback(_callback);
+    	var _callback = pHandler.createCallback(params.callback);
 
 		var self = this;
-		new MetadataHandler(this.$data, params.config).load().then(function(factory){
+		new MetadataHandler(this.$data, params.config).load().then(function(factory:any){
 			var type = factory.type;
             //register to local store
             var storeAlias = params.config.serviceName || params.config.storeAlias;
@@ -58,7 +58,9 @@ export class DynamicMetadata{
             }
 
 			_callback.success(factory, type);
-		}, _callback.error);
+		}, function(err){
+			_callback.error(err);
+		});
 
 		return pHandler.getPromise();
 	}
@@ -76,7 +78,7 @@ export class DynamicMetadata{
 		}
 
 		var pHandler = new PromiseHandler();
-    	var _callback = pHandler.createCallback(_callback);
+    	var _callback = pHandler.createCallback(params.callback);
 
 		this.service(params.config.url, params.config, {
 	        success: function(factory){
@@ -87,7 +89,7 @@ export class DynamicMetadata{
 	            return _callback.error(new Exception("Missing Context Type"))
 	        },
 	        error: _callback.error
-	    })
+	    });
 
 	    return pHandler.getPromise();
 	}
