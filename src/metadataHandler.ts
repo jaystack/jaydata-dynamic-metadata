@@ -73,7 +73,7 @@ export class MetadataHandler{
             if (ctxType) {
                 var cfg = extend({
                     name: 'oData',
-                    oDataServiceHost: this.options.SerivceUri,
+                    oDataServiceHost: this.options.url.replace('/$metadata', ''),
                     user: this.options.user,
                     password: this.options.password,
                     withCredentials: this.options.withCredentials,

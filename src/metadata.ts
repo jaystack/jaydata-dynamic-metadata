@@ -387,7 +387,7 @@ export class Metadata{
         '  if (ctxType){\n' +
         '    var cfg = $data.typeSystem.extend({\n' +
         '      name: "oData",\n' +
-        '      oDataServiceHost: "' + this.options.url + '",\n' +
+        '      oDataServiceHost: "' + this.options.url.replace('/$metadata', '') + '",\n' +
         '      withCredentials: ' + (this.options.withCredentials || false) + ',\n' +
         '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || '4.0') + '"\n' +
         '    }, config);\n' +
