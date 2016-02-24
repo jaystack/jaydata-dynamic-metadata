@@ -285,7 +285,7 @@ export class Metadata{
                     for(var setName in ctx.definition) {
                         let set = ctx.definition[setName]
                         if(set.elementType === bindingParameter.elementType) {
-                            set.actions = set.actions = {}
+                            set.actions = set.actions || {}
                             set.actions[actionInfo.name] = definition
                         }
                     }
