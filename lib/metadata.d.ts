@@ -54,4 +54,5 @@ export declare class Metadata {
     createMethodParameter(parameter: any, definition: any): void;
     applyBoundMethod(actionInfo: any, ns: any, typeDefinitions: any, type: any): void;
     processMetadata(createdTypes?: any): any;
+    orderTypeDefinitions(typeDefinitions: any): any[];
 }

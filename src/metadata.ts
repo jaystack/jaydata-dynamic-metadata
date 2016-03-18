@@ -358,6 +358,7 @@ export class Metadata{
         '  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env\n' +
         '})(function(exports, $data) {\n\n' +
 		'var types = {};\n\n';
+        typeDefinitions = this.orderTypeDefinitions(typeDefinitions)
         types.push(...typeDefinitions.map((d) => {
 
             var srcPart = '';
@@ -405,5 +406,35 @@ export class Metadata{
         types.src += '});';
 
         return types;
+    }
+    
+    orderTypeDefinitions(typeDefinitions){
+        let contextTypes = typeDefinitions.filter(t => t.type === 'context')
+        let ordered = []
+        let dependants = [].concat(typeDefinitions.filter(t => t.type !== 'context'))
+        let addedTypes
+        let baseType = this.options.baseType || this.$data.Entity
+        
+        let dependantCount = Number.MAX_VALUE
+        while (dependants.length) {
+            var dependantItems = [].concat(dependants)
+            dependants.length = 0
+            
+            dependantItems.forEach(typeDef => {
+                if(dependantCount === dependantItems.length ||
+                    typeDef.type !== "entity" || 
+                    typeDef.baseType === baseType || 
+                    ordered.some(t=>t.typeName === typeDef.baseType) 
+                ){
+                    ordered.push(typeDef)
+                } else {
+                    dependants.push(typeDef)
+                }
+            })
+            
+            dependantCount = dependantItems.length
+        }
+        
+        return ordered.concat(contextTypes);   
     }
 }
