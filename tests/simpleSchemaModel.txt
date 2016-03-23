@@ -1,0 +1,57 @@
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") return mod(exports, require("jaydata/core")); // CommonJS
+  if (typeof define == "function" && define.amd) return define(["exports"], mod); // AMD
+  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env
+})(function(exports, $data) {
+
+var types = {};
+
+types["JayData.Test.CommonItems.Entities.Article"] = $data("$data.Entity").extend("JayData.Test.CommonItems.Entities.Article", {
+  RowVersion: {"type":"Edm.Binary"},
+  Lead: {"type":"Edm.String","nullable":false,"required":true},
+  Body: {"type":"Edm.String"},
+  CreateDate: {"type":"Edm.DateTimeOffset"},
+  Thumbnail_LowRes: {"type":"Edm.Binary"},
+  Thumbnail_HighRes: {"type":"Edm.Binary"},
+  Id: {"type":"Edm.Int32","nullable":false,"required":true,"key":true},
+  Title: {"type":"Edm.String"},
+  Category: {"type":"JayData.Test.CommonItems.Entities.Category","inverseProperty":"Articles"}
+});
+
+types["JayData.Test.CommonItems.Entities.Category"] = $data("$data.Entity").extend("JayData.Test.CommonItems.Entities.Category", {
+  RowVersion: {"type":"Edm.Binary"},
+  Subtitle: {"type":"Edm.String"},
+  Description: {"type":"Edm.String"},
+  Id: {"type":"Edm.Int32","nullable":false,"required":true,"key":true},
+  Title: {"type":"Edm.String"},
+  Articles: {"type":"Array","elementType":"JayData.Test.CommonItems.Entities.Article","inverseProperty":"Category"},
+  LocationSwipe: {"type":"$data.ServiceFunction","namespace":"Default","returnType":"Edm.GeographyPoint","params":[{"name":"Loc","type":"Edm.GeographyPoint"}]}
+});
+
+exports.type = types["Default.Container"] = $data("$data.EntityContext").extend("Default.Container", {
+  Articles: {"type":"$data.EntitySet","elementType":"JayData.Test.CommonItems.Entities.Article"},
+  Categories: {"type":"$data.EntitySet","elementType":"JayData.Test.CommonItems.Entities.Category","actions":{"SAction1":{"type":"$data.ServiceAction","namespace":"Default","returnType":"$data.Queryable","params":[{"name":"p1","type":"Edm.Int32"},{"name":"p2","type":"Edm.String"},{"name":"p3","type":"Array","elementType":"Edm.String"}],"elementType":"Edm.String"},"SFunction1":{"type":"$data.ServiceFunction","namespace":"Default","returnType":"$data.Queryable","params":[{"name":"p1","type":"Edm.Int32"},{"name":"p2","type":"Edm.String"},{"name":"p3","type":"Array","elementType":"Edm.String"}],"elementType":"Edm.String"}}},
+  Delete: {"type":"$data.ServiceAction","returnType":null,"params":[]},
+  InitDb: {"type":"$data.ServiceAction","returnType":null,"params":[]},
+  SAction1: {"type":"$data.ServiceAction","returnType":"Edm.String","params":[{"name":"number","type":"Edm.Int32"}]},
+  SAction2: {"type":"$data.ServiceAction","returnType":"$data.Queryable","params":[{"name":"count","type":"Edm.Int32"}],"elementType":"JayData.Test.CommonItems.Entities.Article"},
+  SFunction1: {"type":"$data.ServiceFunction","returnType":"$data.Queryable","params":[{"name":"number","type":"Edm.Int32"}],"elementType":"Edm.String"},
+  SFunction2: {"type":"$data.ServiceFunction","returnType":"JayData.Test.CommonItems.Entities.Article","params":[{"name":"number","type":"Edm.Int32"}]}
+});
+
+var ctxType = exports.type;
+exports.factory = function(config){
+  if (ctxType){
+    var cfg = $data.typeSystem.extend({
+      name: "oData",
+      oDataServiceHost: "",
+      withCredentials: false,
+      maxDataServiceVersion: "4.0"
+    }, config);
+    return new ctxType(cfg);
+  }else{
+    return null;
+  }
+};
+
+});

@@ -28,7 +28,7 @@ export declare class Metadata {
     createEnumType(enumSchema: any, namespace: any): {
         namespace: any;
         typeName: string;
-        baseType: any;
+        baseType: string;
         params: any[];
         definition: any;
         type: string;

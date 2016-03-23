@@ -29,6 +29,12 @@ export class Metadata{
 		this.options = options || {};
         this.metadata = metadata;
         this.options.container = this.$data.Container; //this.options.container || $data.createContainer()
+        
+        this.options.baseType = this.options.baseType || '$data.Entity' 
+        this.options.entitySetType = this.options.entitySetType || '$data.EntitySet' 
+        this.options.contextType = this.options.contextType || '$data.EntityContext' 
+        this.options.collectionBaseType = this.options.collectionBaseType || 'Array' 
+        
 	}
 
 	_getMaxValue(maxValue) {
@@ -41,7 +47,7 @@ export class Metadata{
         containsField(propertySchema, "type", v => {
             var match = _collectionRegex.exec(v)
             if(match){
-                definition.type = this.options.collectionBaseType || 'Array'
+                definition.type = this.options.collectionBaseType
                 definition.elementType = match[1]
             } else {
                 definition.type = v
@@ -87,10 +93,6 @@ export class Metadata{
             if (keys.propertyRefs.some(pr => pr.name === propertySchema.name)) {
                 definition.key = true
             }
-        })
-
-        containsField(propertySchema, "concurrencyMode", v => {
-            definition.concurrencyMode = self.$data.ConcurrencyMode[v]
         })
 
         return {
@@ -140,7 +142,7 @@ export class Metadata{
     }
 
     createEntityType(entitySchema, namespace) {
-        let baseType = (entitySchema.baseType ? entitySchema.baseType : this.options.baseType) || this.$data.Entity
+        let baseType = (entitySchema.baseType ? entitySchema.baseType : this.options.baseType)
         let definition = this.createEntityDefinition(entitySchema)
         let entityFullName = `${namespace}.${entitySchema.name}`
 
@@ -196,7 +198,7 @@ export class Metadata{
         return {
             namespace,
             typeName: enumFullName,
-            baseType: self.$data.Enum,
+            baseType: '$data.Enum',
             params: [enumFullName, this.options.container, enumSchema.underlyingType, definition],
             definition,
             type: 'enum'
@@ -210,7 +212,7 @@ export class Metadata{
         var prop = {
             name: entitySetSchema.name,
             definition: {
-                type: this.options.entitySetType || '$data.EntitySet',
+                type: this.options.entitySetType,
                 elementType: t
             }
         }
@@ -233,7 +235,7 @@ export class Metadata{
             throw new Error("Array type is not supported here")
         }
         var definition = this.createContextDefinition(contextSchema, namespace)
-        var baseType = this.options.contextType || this.$data.EntityContext
+        var baseType = this.options.contextType
         var typeName = `${namespace}.${contextSchema.name}`
         var contextImportMethods = []
         contextSchema.actionImports && contextImportMethods.push(...contextSchema.actionImports)
@@ -279,7 +281,7 @@ export class Metadata{
         if(parsebool(actionInfo.isBound, false)) {
             let bindingParameter = definition.params.shift()
 
-            if(bindingParameter.type === (this.options.collectionBaseType || 'Array')){
+            if(bindingParameter.type === this.options.collectionBaseType){
                 let filteredContextDefinitions = typeDefinitions.filter((d) => d.namespace === ns && d.type === 'context')
                 filteredContextDefinitions.forEach(ctx => {
                     for(var setName in ctx.definition) {
@@ -362,15 +364,15 @@ export class Metadata{
         types.push(...typeDefinitions.map((d) => {
 
             var srcPart = '';
-            if (d.baseType == self.$data.Enum){
+            if (d.baseType == '$data.Enum'){
                 srcPart += 'types["' + d.params[0] + '"] = $data.createEnum("' + d.params[0] + '", [\n' +
                 Object.keys(d.params[3]).map(dp => '  ' + JSON.stringify(d.params[3][dp])).join(',\n') +
                 '\n]);\n\n';
             }else{
-				var typeName = this.options.container.resolveName(d.baseType);
-                if (d.baseType == self.$data.EntityContext) srcPart += 'exports.type = ';
+				var typeName = d.baseType;
+                if (d.baseType == self.options.contextType) srcPart += 'exports.type = ';
 				srcPart += 'types["' + d.params[0] + '"] = ' +
-					(typeName == '$data.Entity' || typeName == '$data.EntityContext' ? typeName : 'types["' + typeName + '"]') +
+					(typeName == self.options.baseType || typeName == self.options.contextType ? ('$data("' + typeName + '")') : 'types["' + typeName + '"]') +
 					'.extend("' + d.params[0] + '", ';
 				if (d.params[2] && Object.keys(d.params[2]).length > 0) srcPart += '{\n' + Object.keys(d.params[2]).map(dp => '  ' + dp + ': '+ JSON.stringify(d.params[2][dp])).join(',\n') + '\n}';
                 else srcPart += 'null';
@@ -380,15 +382,18 @@ export class Metadata{
 			types.src += srcPart;
 
 			if (this.options.debug) console.log('Type generated:', d.params[0]);
-            var baseType = this.options.container.resolveType(d.baseType)
-            return baseType.extend.apply(baseType, d.params)
+            
+            if(this.options.generateTypes !== false){
+                var baseType = this.options.container.resolveType(d.baseType)
+                return baseType.extend.apply(baseType, d.params)
+            }
         }));
 		types.src += 'var ctxType = exports.type;\n' +
         'exports.factory = function(config){\n' +
         '  if (ctxType){\n' +
         '    var cfg = $data.typeSystem.extend({\n' +
         '      name: "oData",\n' +
-        '      oDataServiceHost: "' + this.options.url.replace('/$metadata', '') + '",\n' +
+        '      oDataServiceHost: "' + (this.options.url && this.options.url.replace('/$metadata', '') || '') + '",\n' +
         '      withCredentials: ' + (this.options.withCredentials || false) + ',\n' +
         '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || '4.0') + '"\n' +
         '    }, config);\n' +
@@ -404,7 +409,11 @@ export class Metadata{
 		}
 
         types.src += '});';
-
+        
+        if(this.options.generateTypes === false){
+            types.length = 0;
+        }
+         
         return types;
     }
     
@@ -413,7 +422,7 @@ export class Metadata{
         let ordered = []
         let dependants = [].concat(typeDefinitions.filter(t => t.type !== 'context'))
         let addedTypes
-        let baseType = this.options.baseType || this.$data.Entity
+        let baseType = this.options.baseType
         
         let dependantCount = Number.MAX_VALUE
         while (dependants.length) {

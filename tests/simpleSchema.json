@@ -1,0 +1,341 @@
+{
+  "version": "4.0",
+  "dataServices": {
+    "schema": [
+      {
+        "namespace": "JayData.Test.CommonItems.Entities",
+        "entityType": [
+          {
+            "name": "Article",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "Id"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "RowVersion",
+                "type": "Edm.Binary"
+              },
+              {
+                "name": "Lead",
+                "type": "Edm.String",
+                "nullable": "false"
+              },
+              {
+                "name": "Body",
+                "type": "Edm.String"
+              },
+              {
+                "name": "CreateDate",
+                "type": "Edm.DateTimeOffset"
+              },
+              {
+                "name": "Thumbnail_LowRes",
+                "type": "Edm.Binary"
+              },
+              {
+                "name": "Thumbnail_HighRes",
+                "type": "Edm.Binary"
+              },
+              {
+                "name": "Id",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "Title",
+                "type": "Edm.String"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Category",
+                "type": "JayData.Test.CommonItems.Entities.Category",
+                "partner": "Articles"
+              }
+            ]
+          },
+          {
+            "name": "Category",
+            "key": [
+              {
+                "propertyRef": [
+                  {
+                    "name": "Id"
+                  }
+                ]
+              }
+            ],
+            "property": [
+              {
+                "name": "RowVersion",
+                "type": "Edm.Binary"
+              },
+              {
+                "name": "Subtitle",
+                "type": "Edm.String"
+              },
+              {
+                "name": "Description",
+                "type": "Edm.String"
+              },
+              {
+                "name": "Id",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "Title",
+                "type": "Edm.String"
+              }
+            ],
+            "navigationProperty": [
+              {
+                "name": "Articles",
+                "type": "Collection(JayData.Test.CommonItems.Entities.Article)",
+                "partner": "Category"
+              }
+            ]
+          }
+        ],
+        "annotations": [
+          {
+            "target": "JayData.Test.CommonItems.Entities.Article/Id",
+            "annotation": [
+              {
+                "term": "Org.OData.Core.V1.Computed",
+                "bool": "true"
+              }
+            ]
+          },
+          {
+            "target": "JayData.Test.CommonItems.Entities.Category/Id",
+            "annotation": [
+              {
+                "term": "Org.OData.Core.V1.Computed",
+                "bool": "true"
+              },
+              {
+                "term": "xxxx.ccccc",
+                "bool": "true"
+              }
+            ]
+          },
+          {
+            "target": "JayData.Test.CommonItems.Entities.Category/Title",
+            "annotation": [
+              {
+                "term": "Org.OData.Core.V1.Computed",
+                "bool": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "namespace": "Default",
+        "action": [
+          {
+            "name": "Delete"
+          },
+          {
+            "name": "InitDb"
+          },
+          {
+            "name": "SAction1",
+            "parameter": [
+              {
+                "name": "number",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              }
+            ],
+            "returnType": {
+              "type": "Edm.String"
+            }
+          },
+          {
+            "name": "SAction2",
+            "parameter": [
+              {
+                "name": "count",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              }
+            ],
+            "returnType": {
+              "type": "Collection(JayData.Test.CommonItems.Entities.Article)"
+            }
+          },
+          {
+            "name": "SAction1",
+            "isBound": "true",
+            "parameter": [
+              {
+                "name": "bindingParameter",
+                "type": "Collection(JayData.Test.CommonItems.Entities.Category)"
+              },
+              {
+                "name": "p1",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "p2",
+                "type": "Edm.String"
+              },
+              {
+                "name": "p3",
+                "type": "Collection(Edm.String)"
+              }
+            ],
+            "returnType": {
+              "type": "Collection(Edm.String)"
+            }
+          }
+        ],
+        "function": [
+          {
+            "name": "LocationSwipe",
+            "isBound": "true",
+            "parameter": [
+              {
+                "name": "bindingParameter",
+                "type": "JayData.Test.CommonItems.Entities.Category"
+              },
+              {
+                "name": "Loc",
+                "type": "Edm.GeographyPoint",
+                "SRID": "Variable"
+              }
+            ],
+            "returnType": {
+              "type": "Edm.GeographyPoint",
+              "SRID": "Variable"
+            }
+          },
+          {
+            "name": "SFunction1",
+            "parameter": [
+              {
+                "name": "number",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              }
+            ],
+            "returnType": {
+              "type": "Collection(Edm.String)"
+            }
+          },
+          {
+            "name": "SFunction2",
+            "parameter": [
+              {
+                "name": "number",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              }
+            ],
+            "returnType": {
+              "type": "JayData.Test.CommonItems.Entities.Article"
+            }
+          },
+          {
+            "name": "SFunction1",
+            "isBound": "true",
+            "parameter": [
+              {
+                "name": "bindingParameter",
+                "type": "Collection(JayData.Test.CommonItems.Entities.Category)"
+              },
+              {
+                "name": "p1",
+                "type": "Edm.Int32",
+                "nullable": "false"
+              },
+              {
+                "name": "p2",
+                "type": "Edm.String"
+              },
+              {
+                "name": "p3",
+                "type": "Collection(Edm.String)"
+              }
+            ],
+            "returnType": {
+              "type": "Collection(Edm.String)"
+            }
+          }
+        ],
+        "entityContainer": {
+          "name": "Container",
+          "entitySet": [
+            {
+              "name": "Articles",
+              "entityType": "JayData.Test.CommonItems.Entities.Article",
+              "navigationPropertyBinding": [
+                {
+                  "path": "Category",
+                  "target": "Categories"
+                }
+              ],
+              "annotation": [
+                {
+                  "term": "Org.OData.Core.V1.OptimisticConcurrency",
+                  "collection": [
+                    {
+                      "propertyPath": [
+                        {
+                          "text": "RowVersion"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Categories",
+              "entityType": "JayData.Test.CommonItems.Entities.Category"
+            }
+          ],
+          "actionImport": [
+            {
+              "name": "Delete",
+              "action": "Default.Delete"
+            },
+            {
+              "name": "InitDb",
+              "action": "Default.InitDb"
+            },
+            {
+              "name": "SAction1",
+              "action": "Default.SAction1"
+            },
+            {
+              "name": "SAction2",
+              "action": "Default.SAction2",
+              "entitySet": "Articles"
+            }
+          ],
+          "functionImport": [
+            {
+              "name": "SFunction1",
+              "function": "Default.SFunction1",
+              "includeInServiceDocument": "true"
+            },
+            {
+              "name": "SFunction2",
+              "function": "Default.SFunction2"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
