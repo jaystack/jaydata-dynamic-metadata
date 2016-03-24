@@ -1,10 +1,8 @@
 /// <reference path="../lib/metadata.d.ts" />
 
-var fs = require('fs')
 var Edm = require('odata-metadata').Edm
 var Metadata = require('../lib/metadata.js').Metadata
 var expect = require('chai').expect
-
 var $data = require('jaydata/core')
 
 var options = {
@@ -35,7 +33,7 @@ describe("model build tests", () => {
 
     it("default settings", () => {
         expect(typeof types.src).to.equal("string")
-        expect(types.src).to.equal(fs.readFileSync('./tests/simpleSchemaModel.txt', 'utf8'))
+        expect(types.src).to.equal(require('./simpleSchemaModel.json').src)
     });
 
     describe("entity container", () => {
@@ -327,7 +325,7 @@ describe("options", () => {
         var types = metadata.processMetadata();
 
         expect(types).to.have.length(3)
-        
+
         var container = types[2];
         expect(container.fullName).to.equals('Default.Container')
         expect(container.baseTypes).to.have.length(4)
@@ -346,7 +344,7 @@ describe("options", () => {
         var types = metadata.processMetadata();
 
         expect(types).to.have.length(3)
-        
+
         var container = types[2];
         var def = container.getMemberDefinition('Articles')
         var elementType = types[0];
@@ -380,6 +378,6 @@ describe("without jaydata", () => {
 
         expect(types).to.have.length(0)
         expect(typeof types.src).to.equal("string")
-        expect(types.src).to.equal(fs.readFileSync('./tests/simpleSchemaModel.txt', 'utf8'))
+        expect(types.src).to.equal(require('./simpleSchemaModel.json').src)
     });
 })
