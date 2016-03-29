@@ -130,7 +130,7 @@
             "target": "JayData.Test.CommonItems.Entities.Category/Title",
             "annotation": [
               {
-                "term": "Org.OData.Core.V1.Computed",
+                "term": "Org.OData.Core.V1.Custom",
                 "bool": "true"
               }
             ]

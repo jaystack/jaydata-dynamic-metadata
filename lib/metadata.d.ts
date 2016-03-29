@@ -2,19 +2,20 @@ export declare class Metadata {
     options: any;
     metadata: any;
     private $data;
+    private annotationHandler;
     constructor($data: any, options: any, metadata: any);
     _getMaxValue(maxValue: any): any;
     createTypeDefinition(propertySchema: any, definition: any): void;
     createReturnTypeDefinition(propertySchema: any, definition: any): void;
-    createProperty(entitySchema: any, propertySchema: any): {
+    createProperty(entityFullName: any, entitySchema: any, propertySchema: any): {
         name: any;
         definition: any;
     };
-    createNavigationProperty(entitySchema: any, propertySchema: any): {
+    createNavigationProperty(entityFullName: any, entitySchema: any, propertySchema: any): {
         name: any;
         definition: any;
     };
-    createEntityDefinition(entitySchema: any): any;
+    createEntityDefinition(entitySchema: any, entityFullName: any): any;
     createEntityType(entitySchema: any, namespace: any): {
         namespace: any;
         typeName: string;
@@ -23,8 +24,8 @@ export declare class Metadata {
         definition: any;
         type: string;
     };
-    createEnumOption(entitySchema: any, propertySchema: any, i: any): any;
-    createEnumDefinition(enumSchema: any): any;
+    createEnumOption(enumFullName: any, entitySchema: any, propertySchema: any, i: any): any;
+    createEnumDefinition(enumSchema: any, enumFullName: any): any;
     createEnumType(enumSchema: any, namespace: any): {
         namespace: any;
         typeName: string;
@@ -54,5 +55,6 @@ export declare class Metadata {
     createMethodParameter(parameter: any, definition: any): void;
     applyBoundMethod(actionInfo: any, ns: any, typeDefinitions: any, type: any): void;
     processMetadata(createdTypes?: any): any;
+    private _createPropertyDefString(definition);
     orderTypeDefinitions(typeDefinitions: any): any[];
 }

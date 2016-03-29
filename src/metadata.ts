@@ -1,3 +1,5 @@
+import { Annotations } from './annotations'
+
 var containsField = (obj, field, cb) => {
     // if (field in (obj || {})) {
     //     cb(obj[field])
@@ -7,11 +9,11 @@ var containsField = (obj, field, cb) => {
     }
 }
 
-var parsebool = (b,d) => {
+var parsebool = (b, d) => {
     if ("boolean" === typeof b) {
         return b
     }
-    switch(b) {
+    switch (b) {
         case "true": return true
         case "false": return false
         default: return d
@@ -20,33 +22,35 @@ var parsebool = (b,d) => {
 
 var _collectionRegex = /^Collection\((.*)\)$/
 
-export class Metadata{
-	options:any
-	metadata:any
-	private $data:any
-	constructor($data:any, options:any, metadata:any){
-		this.$data = $data;
-		this.options = options || {};
+export class Metadata {
+    options: any
+    metadata: any
+    private $data: any
+    private annotationHandler: Annotations
+    constructor($data: any, options: any, metadata: any) {
+        this.$data = $data;
+        this.options = options || {};
         this.metadata = metadata;
         this.options.container = this.$data.Container; //this.options.container || $data.createContainer()
-        
-        this.options.baseType = this.options.baseType || '$data.Entity' 
-        this.options.entitySetType = this.options.entitySetType || '$data.EntitySet' 
-        this.options.contextType = this.options.contextType || '$data.EntityContext' 
-        this.options.collectionBaseType = this.options.collectionBaseType || 'Array' 
-        
-	}
 
-	_getMaxValue(maxValue) {
+        this.options.baseType = this.options.baseType || '$data.Entity'
+        this.options.entitySetType = this.options.entitySetType || '$data.EntitySet'
+        this.options.contextType = this.options.contextType || '$data.EntityContext'
+        this.options.collectionBaseType = this.options.collectionBaseType || 'Array'
+
+        this.annotationHandler = new Annotations()
+    }
+
+    _getMaxValue(maxValue) {
         if ("number" === typeof maxValue) return maxValue
         if ("max" === maxValue) return Number.MAX_VALUE
         return parseInt(maxValue)
     }
 
-	createTypeDefinition(propertySchema, definition){
+    createTypeDefinition(propertySchema, definition) {
         containsField(propertySchema, "type", v => {
             var match = _collectionRegex.exec(v)
-            if(match){
+            if (match) {
                 definition.type = this.options.collectionBaseType
                 definition.elementType = match[1]
             } else {
@@ -55,10 +59,10 @@ export class Metadata{
         })
     }
 
-    createReturnTypeDefinition(propertySchema, definition){
+    createReturnTypeDefinition(propertySchema, definition) {
         containsField(propertySchema, "type", v => {
             var match = _collectionRegex.exec(v)
-            if(match){
+            if (match) {
                 definition.returnType = '$data.Queryable'
                 definition.elementType = match[1]
             } else {
@@ -68,21 +72,21 @@ export class Metadata{
     }
 
 
-    createProperty(entitySchema, propertySchema) {
-		var self = this;
+    createProperty(entityFullName, entitySchema, propertySchema) {
+        var self = this;
 
         if (!propertySchema) {
             propertySchema = entitySchema
             entitySchema = undefined
         }
 
-        var definition:any = {}
+        var definition: any = {}
 
         this.createTypeDefinition(propertySchema, definition)
 
         containsField(propertySchema, "nullable", v => {
             definition.nullable = parsebool(v, true),
-            definition.required = parsebool(v, true) === false
+                definition.required = parsebool(v, true) === false
         })
 
         containsField(propertySchema, "maxLength", v => {
@@ -95,34 +99,42 @@ export class Metadata{
             }
         })
 
+        containsField(propertySchema, "annotations", v => {
+            this.annotationHandler.processEntityPropertyAnnotations(entityFullName, propertySchema.name, v)
+        })
+
         return {
             name: propertySchema.name,
             definition
         }
     }
 
-    createNavigationProperty(entitySchema, propertySchema) {
+    createNavigationProperty(entityFullName, entitySchema, propertySchema) {
         if (!propertySchema) {
             propertySchema = entitySchema
             entitySchema = undefined
         }
 
-        var definition:any = {}
+        var definition: any = {}
 
         this.createTypeDefinition(propertySchema, definition)
 
         containsField(propertySchema, "nullable", v => {
             definition.nullable = parsebool(v, true),
-            definition.required = parsebool(v, true) === false
+                definition.required = parsebool(v, true) === false
         })
 
         containsField(propertySchema, "partner", p => {
             definition.inverseProperty = p
         })
 
-        if(!definition.inverseProperty) {
+        if (!definition.inverseProperty) {
             definition.inverseProperty = '$$unbound'
         }
+
+        containsField(propertySchema, "annotations", v => {
+            this.annotationHandler.processEntityPropertyAnnotations(entityFullName, propertySchema.name, v)
+        })
 
         return {
             name: propertySchema.name,
@@ -130,28 +142,32 @@ export class Metadata{
         }
     }
 
-    createEntityDefinition(entitySchema) {
-        var props = (entitySchema.properties || []).map(this.createProperty.bind(this, entitySchema))
-        var navigationProps = (entitySchema.navigationProperties || []).map(this.createNavigationProperty.bind(this, entitySchema))
+    createEntityDefinition(entitySchema, entityFullName) {
+        var props = (entitySchema.properties || []).map(this.createProperty.bind(this, entityFullName, entitySchema))
+        var navigationProps = (entitySchema.navigationProperties || []).map(this.createNavigationProperty.bind(this, entityFullName, entitySchema))
         props = props.concat(navigationProps)
-        var result = props.reduce( (p, c) => {
+        var result = props.reduce((p, c) => {
             p[c.name] = c.definition
             return p
-         }, {})
+        }, {})
         return result
     }
 
     createEntityType(entitySchema, namespace) {
         let baseType = (entitySchema.baseType ? entitySchema.baseType : this.options.baseType)
-        let definition = this.createEntityDefinition(entitySchema)
         let entityFullName = `${namespace}.${entitySchema.name}`
+        let definition = this.createEntityDefinition(entitySchema, entityFullName)
 
-        let staticDefinition:any = {}
+        let staticDefinition: any = {}
 
         containsField(entitySchema, "openType", v => {
-            if(parsebool(v, false)){
+            if (parsebool(v, false)) {
                 staticDefinition.openType = { value: true }
             }
+        })
+        
+        containsField(entitySchema, "annotations", v => {
+            this.annotationHandler.processEntityAnnotations(entityFullName, v)
         })
 
         return {
@@ -164,13 +180,13 @@ export class Metadata{
         }
     }
 
-    createEnumOption(entitySchema, propertySchema, i) {
+    createEnumOption(enumFullName, entitySchema, propertySchema, i) {
         if (!propertySchema) {
             propertySchema = entitySchema
             entitySchema = undefined
         }
 
-        var definition:any = {
+        var definition: any = {
             name: propertySchema.name,
             index: i
         }
@@ -182,18 +198,26 @@ export class Metadata{
             }
         })
 
+        containsField(propertySchema, "annotations", v => {
+            this.annotationHandler.processEntityPropertyAnnotations(enumFullName, propertySchema.name, v, true)
+        })
+
         return definition
     }
 
-    createEnumDefinition(enumSchema) {
-        var props = (enumSchema.members || []).map(this.createEnumOption.bind(this, enumSchema))
+    createEnumDefinition(enumSchema, enumFullName) {
+        var props = (enumSchema.members || []).map(this.createEnumOption.bind(this, enumFullName, enumSchema))
         return props
     }
 
     createEnumType(enumSchema, namespace) {
-		var self = this;
-        let definition = this.createEnumDefinition(enumSchema)
+        var self = this;
         let enumFullName = `${namespace}.${enumSchema.name}`
+        let definition = this.createEnumDefinition(enumSchema, enumFullName)
+
+        containsField(enumSchema, "annotations", v => {
+            this.annotationHandler.processEntityAnnotations(enumFullName, v, true)
+        })
 
         return {
             namespace,
@@ -216,17 +240,22 @@ export class Metadata{
                 elementType: t
             }
         }
+        
+        containsField(entitySetSchema, "annotations", v => {
+            this.annotationHandler.processEntitySetAnnotations(t, v)
+        })
+        
         return prop
     }
 
     indexBy(fieldName, pick) {
-        return [(p, c) => { p[c[fieldName]] = c[pick];  return p }, {}]
+        return [(p, c) => { p[c[fieldName]] = c[pick]; return p }, {}]
     }
 
     createContextDefinition(contextSchema, namespace) {
-        var props = (contextSchema.entitySets || []).map( es => this.createEntitySetProperty(es, contextSchema))
+        var props = (contextSchema.entitySets || []).map(es => this.createEntitySetProperty(es, contextSchema))
 
-        var result = props.reduce(...this.indexBy("name","definition"))
+        var result = props.reduce(...this.indexBy("name", "definition"))
         return result
     }
 
@@ -278,15 +307,15 @@ export class Metadata{
         let parameters = [].concat(actionInfo.parameters)
         parameters.forEach((p) => this.createMethodParameter(p, definition))
 
-        if(parsebool(actionInfo.isBound, false)) {
+        if (parsebool(actionInfo.isBound, false)) {
             let bindingParameter = definition.params.shift()
 
-            if(bindingParameter.type === this.options.collectionBaseType){
+            if (bindingParameter.type === this.options.collectionBaseType) {
                 let filteredContextDefinitions = typeDefinitions.filter((d) => d.namespace === ns && d.type === 'context')
                 filteredContextDefinitions.forEach(ctx => {
-                    for(var setName in ctx.definition) {
+                    for (var setName in ctx.definition) {
                         let set = ctx.definition[setName]
-                        if(set.elementType === bindingParameter.elementType) {
+                        if (set.elementType === bindingParameter.elementType) {
                             set.actions = set.actions || {}
                             set.actions[actionInfo.name] = definition
                         }
@@ -305,7 +334,7 @@ export class Metadata{
             let filteredContextDefinitions = typeDefinitions.filter((d) => d.type === 'context')
             filteredContextDefinitions.forEach((ctx) => {
                 ctx.contextImportMethods.forEach(methodImportInfo => {
-                    if(methodImportInfo.action === methodFullName || methodImportInfo.function === methodFullName){
+                    if (methodImportInfo.action === methodFullName || methodImportInfo.function === methodFullName) {
                         ctx.definition[actionInfo.name] = definition
                     }
                 })
@@ -319,7 +348,18 @@ export class Metadata{
         var typeDefinitions = []
         var serviceMethods = []
 
-		var self = this;
+        containsField(this.metadata, "references", references => {
+            references.forEach(ref => {
+                containsField(ref, "includes", includes => {
+                    includes.forEach(include => {
+                        this.annotationHandler.addInclude(include)
+                    })
+                })
+            })
+        })
+
+
+        var self = this;
         this.metadata.dataServices.schemas.forEach(schema => {
             var ns = schema.namespace
 
@@ -338,11 +378,11 @@ export class Metadata{
                 typeDefinitions.push(...entityTypes)
             }
 
-            if(schema.actions){
+            if (schema.actions) {
                 serviceMethods.push(...schema.actions.map(m => defs => this.applyBoundMethod(m, ns, defs, '$data.ServiceAction')))
             }
 
-            if(schema.functions){
+            if (schema.functions) {
                 serviceMethods.push(...schema.functions.map(m => defs => this.applyBoundMethod(m, ns, defs, '$data.ServiceFunction')))
             }
 
@@ -350,100 +390,123 @@ export class Metadata{
                 let contexts = schema.entityContainer.map(ctx => this.createContextType(ctx, self.options.namespace || ns))
                 typeDefinitions.push(...contexts)
             }
+
+            //console.log('annotations', schema)
+            containsField(schema, 'annotations', (annotations) => {
+                annotations.forEach((annot) => {
+                    containsField(annot, "target", target => {
+                        containsField(annot, "annotations", v => {
+                            this.annotationHandler.processSchemaAnnotations(target, v, annot.qualifier)
+                        })
+                    })
+                })
+            })
         })
 
         serviceMethods.forEach(m => m(typeDefinitions))
 
-		types.src = '(function(mod) {\n' +
-        '  if (typeof exports == "object" && typeof module == "object") return mod(exports, require("jaydata/core")); // CommonJS\n' +
-        '  if (typeof define == "function" && define.amd) return define(["exports"], mod); // AMD\n' +
-        '  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env\n' +
-        '})(function(exports, $data) {\n\n' +
-		'var types = {};\n\n';
+        types.src = '(function(mod) {\n' +
+            '  if (typeof exports == "object" && typeof module == "object") return mod(exports, require("jaydata/core")); // CommonJS\n' +
+            '  if (typeof define == "function" && define.amd) return define(["exports"], mod); // AMD\n' +
+            '  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env\n' +
+            '})(function(exports, $data) {\n\n' +
+            'var types = {};\n\n';
         typeDefinitions = this.orderTypeDefinitions(typeDefinitions)
         types.push(...typeDefinitions.map((d) => {
+            this.annotationHandler.preProcessAnnotation(d)
 
             var srcPart = '';
-            if (d.baseType == '$data.Enum'){
+            if (d.baseType == '$data.Enum') {
                 srcPart += 'types["' + d.params[0] + '"] = $data.createEnum("' + d.params[0] + '", [\n' +
-                Object.keys(d.params[3]).map(dp => '  ' + JSON.stringify(d.params[3][dp])).join(',\n') +
-                '\n]);\n\n';
-            }else{
-				var typeName = d.baseType;
+                    Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +
+                    '\n]);\n\n';
+            } else {
+                var typeName = d.baseType;
                 if (d.baseType == self.options.contextType) srcPart += 'exports.type = ';
-				srcPart += 'types["' + d.params[0] + '"] = ' +
-					(typeName == self.options.baseType || typeName == self.options.contextType ? ('$data("' + typeName + '")') : 'types["' + typeName + '"]') +
-					'.extend("' + d.params[0] + '", ';
-				if (d.params[2] && Object.keys(d.params[2]).length > 0) srcPart += '{\n' + Object.keys(d.params[2]).map(dp => '  ' + dp + ': '+ JSON.stringify(d.params[2][dp])).join(',\n') + '\n}';
+                srcPart += 'types["' + d.params[0] + '"] = ' +
+                    (typeName == self.options.baseType || typeName == self.options.contextType ? ('$data("' + typeName + '")') : 'types["' + typeName + '"]') +
+                    '.extend("' + d.params[0] + '", ';
+                if (d.params[2] && Object.keys(d.params[2]).length > 0) srcPart += '{\n' + Object.keys(d.params[2]).map(dp => '  ' + dp + ': ' + this._createPropertyDefString(d.params[2][dp])).join(',\n') + '\n}';
                 else srcPart += 'null';
-                if (d.params[3] && Object.keys(d.params[3]).length > 0) srcPart += ', {\n' + Object.keys(d.params[3]).map(dp => '  ' + dp + ': '+ JSON.stringify(d.params[3][dp])).join(',\n') + '\n}';
-				srcPart += ');\n\n';
+                if (d.params[3] && Object.keys(d.params[3]).length > 0) srcPart += ', {\n' + Object.keys(d.params[3]).map(dp => '  ' + dp + ': ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') + '\n}';
+                srcPart += ');\n\n';
             }
-			types.src += srcPart;
+            types.src += srcPart;
 
-			if (this.options.debug) console.log('Type generated:', d.params[0]);
-            
-            if(this.options.generateTypes !== false){
+            if (this.options.debug) console.log('Type generated:', d.params[0]);
+
+            if (this.options.generateTypes !== false) {
                 var baseType = this.options.container.resolveType(d.baseType)
-                return baseType.extend.apply(baseType, d.params)
+                var type = baseType.extend.apply(baseType, d.params)
+                this.annotationHandler.addAnnotation(type)
+                return type
             }
         }));
-		types.src += 'var ctxType = exports.type;\n' +
-        'exports.factory = function(config){\n' +
-        '  if (ctxType){\n' +
-        '    var cfg = $data.typeSystem.extend({\n' +
-        '      name: "oData",\n' +
-        '      oDataServiceHost: "' + (this.options.url && this.options.url.replace('/$metadata', '') || '') + '",\n' +
-        '      withCredentials: ' + (this.options.withCredentials || false) + ',\n' +
-        '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || '4.0') + '"\n' +
-        '    }, config);\n' +
-        '    return new ctxType(cfg);\n' +
-        '  }else{\n' +
-        '    return null;\n' +
-        '  }\n' +
-        '};\n\n';
+        
+        types.src += 'var ctxType = exports.type;\n' +
+            'exports.factory = function(config){\n' +
+            '  if (ctxType){\n' +
+            '    var cfg = $data.typeSystem.extend({\n' +
+            '      name: "oData",\n' +
+            '      oDataServiceHost: "' + (this.options.url && this.options.url.replace('/$metadata', '') || '') + '",\n' +
+            '      withCredentials: ' + (this.options.withCredentials || false) + ',\n' +
+            '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || '4.0') + '"\n' +
+            '    }, config);\n' +
+            '    return new ctxType(cfg);\n' +
+            '  }else{\n' +
+            '    return null;\n' +
+            '  }\n' +
+            '};\n\n';
 
-		if (this.options.autoCreateContext){
-			var contextName = typeof this.options.autoCreateContext == 'string' ? this.options.autoCreateContext : 'context';
-			types.src += 'exports["' + contextName + '"] = exports.factory();\n\n';
-		}
+        if (this.options.autoCreateContext) {
+            var contextName = typeof this.options.autoCreateContext == 'string' ? this.options.autoCreateContext : 'context';
+            types.src += 'exports["' + contextName + '"] = exports.factory();\n\n';
+        }
+        types.src += this.annotationHandler.annotationsText()
 
         types.src += '});';
-        
-        if(this.options.generateTypes === false){
+
+        if (this.options.generateTypes === false) {
             types.length = 0;
         }
-         
+
         return types;
     }
-    
-    orderTypeDefinitions(typeDefinitions){
+    private _createPropertyDefString(definition){
+        if(definition.concurrencyMode){
+            return JSON.stringify(definition).replace('"concurrencyMode":"fixed"}', '"concurrencyMode":$data.ConcurrencyMode.Fixed}')
+        } else {
+            return JSON.stringify(definition)
+        }
+    }
+
+    orderTypeDefinitions(typeDefinitions) {
         let contextTypes = typeDefinitions.filter(t => t.type === 'context')
         let ordered = []
         let dependants = [].concat(typeDefinitions.filter(t => t.type !== 'context'))
         let addedTypes
         let baseType = this.options.baseType
-        
+
         let dependantCount = Number.MAX_VALUE
         while (dependants.length) {
             var dependantItems = [].concat(dependants)
             dependants.length = 0
-            
+
             dependantItems.forEach(typeDef => {
-                if(dependantCount === dependantItems.length ||
-                    typeDef.type !== "entity" || 
-                    typeDef.baseType === baseType || 
-                    ordered.some(t=>t.typeName === typeDef.baseType) 
-                ){
+                if (dependantCount === dependantItems.length ||
+                    typeDef.type !== "entity" ||
+                    typeDef.baseType === baseType ||
+                    ordered.some(t => t.typeName === typeDef.baseType)
+                ) {
                     ordered.push(typeDef)
                 } else {
                     dependants.push(typeDef)
                 }
             })
-            
+
             dependantCount = dependantItems.length
         }
-        
-        return ordered.concat(contextTypes);   
+
+        return ordered.concat(contextTypes);
     }
 }
