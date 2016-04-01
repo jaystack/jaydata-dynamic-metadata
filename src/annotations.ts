@@ -100,6 +100,8 @@ export class Annotations {
 
     addAnnotation(type) {
         this.annotations.forEach(annotationInfo => {
+            if(type.fullName !== annotationInfo.typeName) return
+            
             let property = annotationInfo.property
             let annotation = annotationInfo.annotation
 

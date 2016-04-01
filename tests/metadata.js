@@ -441,14 +441,14 @@ describe("reflect annotations", () => {
     })
     
     it("enum level annotation", () => {
-        var type = types[3]
+        var type = types[0]
         
         expect(Reflect.hasMetadata('UI.DisplayName', type)).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', type)).to.deep.equal("UserType Display")
     })
     
     it("enum level annotation for property", () => {
-        var type = types[3]
+        var type = types[0]
         
         expect(Reflect.hasMetadata('UI.DisplayName', type, 'Guest')).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', type, 'Guest')).to.deep.equal("Guest display")
@@ -485,18 +485,28 @@ describe("reflect annotations", () => {
     })
     
     it("enum property level annotation", () => {
-        var type = types[3]
+        var type = types[0]
         
         expect(Reflect.hasMetadata('Property.UI.DisplayName', type, 'Admin')).to.be.true
         expect(Reflect.getMetadata('Property.UI.DisplayName', type, 'Admin')).to.deep.equal("Admin Display")
     })
     
     it("enum property level annotation with path", () => {
-        var type = types[3]
+        var type = types[0]
         
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', type, 'Customer')).to.be.false
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', type, 'Admin')).to.be.true
         expect(Reflect.getMetadata('Property.Level.With.Path.Annot', type, 'Admin')).to.deep.equal("annotation value")
+    })
+    
+    it("fix: annotation applied only one type", () => {
+        var type = types[3]
+        var type2 = types[5]
+        
+        expect(Reflect.hasMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.be.true
+        expect(Reflect.getMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.deep.equal(["RowVersion"])
+        
+        expect(Reflect.hasMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type2())).to.be.false
     })
 })
 
