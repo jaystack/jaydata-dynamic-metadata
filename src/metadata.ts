@@ -165,7 +165,7 @@ export class Metadata {
                 staticDefinition.openType = { value: true }
             }
         })
-        
+
         containsField(entitySchema, "annotations", v => {
             this.annotationHandler.processEntityAnnotations(entityFullName, v)
         })
@@ -240,11 +240,11 @@ export class Metadata {
                 elementType: t
             }
         }
-        
+
         containsField(entitySetSchema, "annotations", v => {
             this.annotationHandler.processEntitySetAnnotations(t, v)
         })
-        
+
         return prop
     }
 
@@ -407,7 +407,7 @@ export class Metadata {
 
         types.src = '(function(mod) {\n' +
             '  if (typeof exports == "object" && typeof module == "object") return mod(exports, require("jaydata/core")); // CommonJS\n' +
-            '  if (typeof define == "function" && define.amd) return define(["exports"], mod); // AMD\n' +
+            '  if (typeof define == "function" && define.amd) return define(["exports", "jaydata/core"], mod); // AMD\n' +
             '  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env\n' +
             '})(function(exports, $data) {\n\n' +
             'var types = {};\n\n';
@@ -442,7 +442,7 @@ export class Metadata {
                 return type
             }
         }));
-        
+
         types.src += 'var ctxType = exports.type;\n' +
             'exports.factory = function(config){\n' +
             '  if (ctxType){\n' +
