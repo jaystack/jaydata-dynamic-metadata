@@ -376,136 +376,136 @@ describe("reflect annotations", () => {
 
     it("schema level class annotation", () => {
         var type = types[5]
-        
+
         expect(Reflect.hasMetadata('UI.Display', new type())).to.be.true
         expect(Reflect.getMetadata('UI.Display', new type())).to.equal('Category display')
     })
 
     it("schema level property annotation", () => {
         var type = types[5]
-        
+
         expect(Reflect.hasMetadata('Org.OData.Core.V1.Computed', new type(), 'Id')).to.be.true
         expect(Reflect.getMetadata('Org.OData.Core.V1.Computed', new type(), 'Id')).to.equal('true')
     })
 
     it("schema level property annotation multiple", () => {
         var type = types[5]
-        
+
         expect(Reflect.hasMetadata('Org.OData.Core.V1.Computed', new type(), 'Id')).to.be.true
         expect(Reflect.getMetadata('Org.OData.Core.V1.Computed', new type(), 'Id')).to.equal('true')
-        
+
         expect(Reflect.hasMetadata('UI.Display', new type(), 'Id')).to.be.true
         expect(Reflect.getMetadata('UI.Display', new type(), 'Id')).to.equal('Identity')
     })
 
     it("schema level property annotation qualifier", () => {
         var type = types[5]
-        
+
         expect(Reflect.hasMetadata('Tablet:UI.Display', new type(), 'Title')).to.be.true
         expect(Reflect.getMetadata('Tablet:UI.Display', new type(), 'Title')).to.equal('M Title')
     })
 
     it("schema level property annotation double qualifier", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Display:Tablet:UI.Display', new type(), 'Body')).to.be.true
         expect(Reflect.getMetadata('Display:Tablet:UI.Display', new type(), 'Body')).to.equal('DM Body')
     })
-    
+
     it("entity set level annotation", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.be.true
         expect(Reflect.getMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.deep.equal(["RowVersion"])
     })
-    
+
     it("entity set level annotation for property", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Entity.Property.DisplayName', new type(), 'Lead')).to.be.true
         expect(Reflect.getMetadata('Entity.Property.DisplayName', new type(), 'Lead')).to.deep.equal("Entity Lead display")
     })
-    
+
     it("entity level annotation", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('UI.DisplayName', new type())).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', new type())).to.deep.equal("Article Display")
     })
-    
+
     it("entity level annotation for property", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('UI.DisplayName', new type(), 'Lead')).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', new type(), 'Lead')).to.deep.equal("Lead display")
     })
-    
+
     it("enum level annotation", () => {
         var type = types[0]
-        
+
         expect(Reflect.hasMetadata('UI.DisplayName', type)).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', type)).to.deep.equal("UserType Display")
     })
-    
+
     it("enum level annotation for property", () => {
         var type = types[0]
-        
+
         expect(Reflect.hasMetadata('UI.DisplayName', type, 'Guest')).to.be.true
         expect(Reflect.getMetadata('UI.DisplayName', type, 'Guest')).to.deep.equal("Guest display")
     })
-    
+
     it("property level annotation", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Property.UI.DisplayName', new type(), 'Body')).to.be.true
         expect(Reflect.getMetadata('Property.UI.DisplayName', new type(), 'Body')).to.deep.equal("Body Display")
     })
-    
+
     it("property level annotation with path", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', new type(), 'Lead')).to.be.false
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', new type(), 'Body')).to.be.true
         expect(Reflect.getMetadata('Property.Level.With.Path.Annot', new type(), 'Body')).to.deep.equal("annotation value")
     })
-    
+
     it("navigation property level annotation", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Property.UI.DisplayName', new type(), 'Category')).to.be.true
         expect(Reflect.getMetadata('Property.UI.DisplayName', new type(), 'Category')).to.deep.equal("Articles Display")
     })
-    
+
     it("navigation property level annotation with path", () => {
         var type = types[3]
-        
+
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', new type(), 'Reviewer')).to.be.false
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', new type(), 'Category')).to.be.true
         expect(Reflect.getMetadata('Property.Level.With.Path.Annot', new type(), 'Category')).to.deep.equal("annotation value")
     })
-    
+
     it("enum property level annotation", () => {
         var type = types[0]
-        
+
         expect(Reflect.hasMetadata('Property.UI.DisplayName', type, 'Admin')).to.be.true
         expect(Reflect.getMetadata('Property.UI.DisplayName', type, 'Admin')).to.deep.equal("Admin Display")
     })
-    
+
     it("enum property level annotation with path", () => {
         var type = types[0]
-        
+
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', type, 'Customer')).to.be.false
         expect(Reflect.hasMetadata('Property.Level.With.Path.Annot', type, 'Admin')).to.be.true
         expect(Reflect.getMetadata('Property.Level.With.Path.Annot', type, 'Admin')).to.deep.equal("annotation value")
     })
-    
+
     it("fix: annotation applied only one type", () => {
         var type = types[3]
         var type2 = types[5]
-        
+
         expect(Reflect.hasMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.be.true
         expect(Reflect.getMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type())).to.deep.equal(["RowVersion"])
-        
+
         expect(Reflect.hasMetadata('Org.OData.Core.V1.OptimisticConcurrency', new type2())).to.be.false
     })
 })
@@ -518,7 +518,7 @@ describe("annotations on model", () => {
         var metadata = new Metadata($data, {}, edmMetadata);
         types = metadata.processMetadata();
     })
-    
+
     it("computed key", () => {
         var type = types[3];
         expect(type.name).to.equals('Article')
@@ -527,7 +527,7 @@ describe("annotations on model", () => {
         expect(def.name).to.equals('Id')
         expect(def.type).to.equal($data.Integer)
         expect(def.originalType).to.equal('Edm.Int32')
-        
+
         expect(def.key).to.be.true
         expect(def.computed).to.be.true
         expect(def.required).to.be.undefined
@@ -541,7 +541,7 @@ describe("annotations on model", () => {
         expect(def.name).to.equals('RowVersion')
         expect(def.type).to.equal($data.Blob)
         expect(def.originalType).to.equal('Edm.Binary')
-        
+
         expect(def.concurrencyMode).to.equal($data.ConcurrencyMode.Fixed)
     })
 })
@@ -570,5 +570,15 @@ describe("without jaydata", () => {
         expect(types).to.have.length(0)
         expect(typeof types.src).to.equal("string")
         expect(types.src).to.equal(require('./simpleSchemaModel.json').src)
+    });
+
+    it("typescript d.ts generation", () => {
+        var schema = require('./simpleSchema.json');
+        var edmMetadata = new Edm.Edmx(schema);
+        var metadata = new Metadata({}, { generateTypes: false }, edmMetadata);
+        var types = metadata.processMetadata();
+
+        expect(types).to.have.length(0)
+        expect(typeof types.dts).to.equal("string")
     });
 })

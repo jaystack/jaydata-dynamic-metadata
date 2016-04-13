@@ -56,5 +56,6 @@ export declare class Metadata {
     applyBoundMethod(actionInfo: any, ns: any, typeDefinitions: any, type: any): void;
     processMetadata(createdTypes?: any): any;
     private _createPropertyDefString(definition);
+    private _typeToTS(type, elementType, definition);
     orderTypeDefinitions(typeDefinitions: any): any[];
 }
