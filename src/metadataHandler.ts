@@ -56,6 +56,7 @@ export class MetadataHandler{
 	                var factory = self._createFactoryFunc(contextType);
 	                factory.type = contextType;
 					factory.src = types.src;
+					factory.dts = types.dts;
 
 	                resolve(factory);
 	            },

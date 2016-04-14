@@ -1,4 +1,5 @@
 import { Annotations } from './annotations'
+import { JayData } from './dts'
 
 var containsField = (obj, field, cb) => {
     // if (field in (obj || {})) {
@@ -28,6 +29,9 @@ const dtsTypeMapping = {
     'Edm.DateTime': 'Date',
     'Edm.DateTimeOffset': 'Date',
     'Edm.Time': 'string',
+    'Edm.Duration': 'string',
+    'Edm.TimeOfDay': 'string',
+    'Edm.Date': 'string',
     'Edm.Decimal': 'string',
     'Edm.Single': 'number',
     'Edm.Float': 'number',
@@ -397,7 +401,8 @@ export class Metadata {
                     '//////                      OData  V4  TypeScript                              /////////\n' +
                     '//////////////////////////////////////////////////////////////////////////////////////*/\n\n';
 
-        types.dts += Object.keys(dtsTypeMapping).map(t => 'type ' + t + ' = ' + dtsTypeMapping[t] + ';').join('\n') + '\n\n';
+        types.dts += JayData.src + '\n\n';
+        //types.dts += 'declare module Edm {\n' + Object.keys(dtsTypeMapping).map(t => '    type ' + t.split('.')[1] + ' = ' + dtsTypeMapping[t] + ';').join('\n') + '\n}\n\n';
 
         var self = this;
         this.metadata.dataServices.schemas.forEach(schema => {
@@ -462,14 +467,16 @@ export class Metadata {
             var srcPart = '';
             if (d.baseType == '$data.Enum') {
                 dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends $data.Enum {');
+                if (d.params[3] && Object.keys(d.params[3]).length > 0){
+                    Object.keys(d.params[3]).forEach(dp => dtsPart.push('        static ' + d.params[3][dp].name));
+                }
                 srcPart += 'types["' + d.params[0] + '"] = $data.createEnum("' + d.params[0] + '", [\n' +
                     Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +
                     '\n]);\n\n';
             } else {
                 dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends ' + d.baseType + ' {');
                 if (d.baseType == self.options.contextType){
-                    dtsPart.push('        onReady(): $data.IPromise;');
-                    dtsPart.push('        onReady(handler: (context: Container) => void): $data.IPromise;');
+                    dtsPart.push('        onReady(): Promise<' + d.typeName.split('.').pop() + '>;');
                     dtsPart.push('');
                 }else{
                     dtsPart.push('        constructor();');
@@ -539,6 +546,7 @@ export class Metadata {
 
         types.src += '});';
         types.dts += Object.keys(dtsModules).map(m => dtsModules[m].join('\n\n')).join('\n\n');
+        console.log(types.dts);
 
         if (this.options.generateTypes === false) {
             types.length = 0;
@@ -562,9 +570,10 @@ export class Metadata {
         }else if (type == this.options.collectionBaseType){
             return elementType + '[]';
         }else if (type == '$data.ServiceAction'){
-            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)) + '; ': '') + 'handler?: () => void): $data.IPromise; }';
+            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)).join(', ') : '') + '): Promise<void>; }';
         }else if (type == '$data.ServiceFunction'){
-            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)) + '; ': '') + 'handler?: () => ' + this._typeToTS(definition.returnType, definition.elementType, definition) + '): $data.IPromise; }';
+            //queryable instead of promise
+            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)).join(', ') : '') + '): Promise<' + this._typeToTS(definition.returnType, definition.elementType, definition) + '>; }';
         }else return type;
     }
 

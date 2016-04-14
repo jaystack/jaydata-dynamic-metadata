@@ -573,7 +573,7 @@ describe("without jaydata", () => {
     });
 
     it("typescript d.ts generation", () => {
-        var schema = require('./simpleSchema.json');
+        var schema = require('./schema2.json');
         var edmMetadata = new Edm.Edmx(schema);
         var metadata = new Metadata({}, { generateTypes: false }, edmMetadata);
         var types = metadata.processMetadata();
