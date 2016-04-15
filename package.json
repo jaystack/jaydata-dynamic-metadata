@@ -77,5 +77,6 @@
   },
   "scripts": {
     "test": "mocha tests"
-  }
+  },
+  "typings": "lib/service.d.ts"
 }
