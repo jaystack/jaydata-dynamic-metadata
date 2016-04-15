@@ -546,7 +546,6 @@ export class Metadata {
 
         types.src += '});';
         types.dts += Object.keys(dtsModules).map(m => dtsModules[m].join('\n\n')).join('\n\n');
-        console.log(types.dts);
 
         if (this.options.generateTypes === false) {
             types.length = 0;

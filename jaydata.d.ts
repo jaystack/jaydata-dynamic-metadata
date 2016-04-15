@@ -17,7 +17,7 @@ declare module $data{
 
     class Enum{}
     class Entity{}
-    class EntitySet<T extends Entity>{
+    class EntitySet<T extends Entity> extends Queryable<T>{
         add(item: T): T;
         add(initData: {}): T;
         attach(item: T): void;
@@ -44,7 +44,7 @@ declare module $data{
         include(selector: string): Queryable<T>;
         skip(amount: number): Queryable<T>;
         take(amount: number): Queryable<T>;
-        forEach(handler: (it: any) => void): Promise<T>;
+        forEach(handler: (it: T) => void): Promise<T>;
         length(): Promise<number>;
         toArray(): Promise<T[]>;
         single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
