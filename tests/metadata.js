@@ -580,5 +580,6 @@ describe("without jaydata", () => {
 
         expect(types).to.have.length(0)
         expect(typeof types.dts).to.equal("string")
+        //console.log(types.dts);
     });
 })

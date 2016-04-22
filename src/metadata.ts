@@ -451,6 +451,7 @@ export class Metadata {
 
         serviceMethods.forEach(m => m(typeDefinitions))
 
+        var contextFullName;
         types.src = '(function(mod) {\n' +
             '  if (typeof exports == "object" && typeof module == "object") return mod(exports, require("jaydata/core")); // CommonJS\n' +
             '  if (typeof define == "function" && define.amd) return define(["exports", "jaydata/core"], mod); // AMD\n' +
@@ -490,7 +491,10 @@ export class Metadata {
                 }
 
                 var typeName = d.baseType;
-                if (d.baseType == this.options.contextType) srcPart += 'exports.type = ';
+                if (d.baseType == this.options.contextType){
+                    srcPart += 'exports.type = ';
+                    contextFullName = d.typeName;
+                }
                 srcPart += 'types["' + d.params[0] + '"] = ' +
                     (typeName == this.options.baseType || typeName == this.options.contextType ? ('$data("' + typeName + '")') : 'types["' + typeName + '"]') +
                     '.extend("' + d.params[0] + '", ';
@@ -546,6 +550,13 @@ export class Metadata {
 
         types.src += '});';
         types.dts += Object.keys(dtsModules).map(m => dtsModules[m].join('\n\n')).join('\n\n');
+        
+        if (contextFullName){
+            types.dts += ['\n\ndeclare module "' + (this.options.contextName || 'JayDataContext') + '"{',
+                '   export var type: typeof ' + contextFullName + ';',
+                '   export var factory:(config:any) => ' + contextFullName + ';',
+                '}'].join('\n');
+        }
 
         if (this.options.generateTypes === false) {
             types.length = 0;
@@ -563,7 +574,7 @@ export class Metadata {
 
     private _typeToTS(type, elementType, definition){
         if (type == this.options.entitySetType){
-            return '$data.EntitySet<' + elementType + '>';
+            return '$data.EntitySet<typeof ' + elementType + ', ' + elementType + '>';
         }else if (type == '$data.Queryable'){
             return '$data.Queryable<' + elementType + '>';
         }else if (type == this.options.collectionBaseType){
@@ -571,8 +582,9 @@ export class Metadata {
         }else if (type == '$data.ServiceAction'){
             return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)).join(', ') : '') + '): Promise<void>; }';
         }else if (type == '$data.ServiceFunction'){
-            //queryable instead of promise
-            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)).join(', ') : '') + '): Promise<' + this._typeToTS(definition.returnType, definition.elementType, definition) + '>; }';
+            var t = this._typeToTS(definition.returnType, definition.elementType, definition);
+            if (t.indexOf('$data.Queryable') < 0) t = 'Promise<' + t + '>';
+            return '{ (' + (definition.params.length > 0 ? definition.params.map(p => p.name + ': ' + this._typeToTS(p.type, p.elementType, p)).join(', ') : '') + '): ' + t + '; }';
         }else return type;
     }
 

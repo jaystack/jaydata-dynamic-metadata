@@ -14,10 +14,74 @@ declare module $data{
     class GeometryMultiPolygon{}
     class GeometryMultiLineString{}
     class GeometryCollection{}
+    
+    const enum EntityState{
+        Detached = 0,
+        Unchanged = 10,
+        Added = 20,
+        Modified = 30,
+        Deleted = 40
+    }
+    
+    interface MemberDefinition{
+        name: string;
+        type: any;
+        dataType: any;
+        elementType: any;
+        originalType: any;
+        kind: string;
+        classMember: boolean;
+        set: (value:any) => void;
+        get: () => any;
+        value: any;
+        initialValue: any;
+        method: Function;
+        enumerable: boolean;
+        configurable: boolean;
+        key: boolean;
+        computed: boolean;
+        storeOnObject: boolean;
+        monitorChanges: boolean;
+    }
+    
+    interface Event{
+        attach(eventHandler: (sender: any, event: any) => void ): void;
+        detach(eventHandler: () => void ): void;
+        fire(e: any, sender: any): void;
+    }
 
-    class Enum{}
-    class Entity{}
-    class EntitySet<T extends Entity> extends Queryable<T>{
+    class Base<T>{
+        constructor();
+        getType: () => typeof Base;
+        
+        static addProperty(name:string, getterOrType:string | Function, setterOrGetter?:Function, setter?:Function);
+        static addMember(name:string, definition:any, isClassMember?:boolean);
+        static describeField(name:string, definition:any);
+        
+        static hasMetadata(key:string, property?:string): boolean;
+        static getAllMetadata(property?:string): any;
+        static getMetadata(key:string, property?:string): any;
+        static setMetadata(key:string, value:any, property?:string): void;
+    }
+    
+    class Enum extends Base<Enum>{
+        static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<Enum>;
+    }
+    function createEnum(name:string, enumType:any, enumDefinition?:any): Base<Enum>;
+    
+    class Entity extends Base<Entity>{
+        static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<Entity>;
+        
+        entityState: EntityState;
+        changedProperties: MemberDefinition[];
+        
+        propertyChanging: Event;
+        propertyChanged: Event;
+        propertyValidationError: Event;
+        isValid: boolean;
+    }
+    
+    class EntitySet<Ttype extends typeof Entity, T extends Entity> extends Queryable<T>{
         add(item: T): T;
         add(initData: {}): T;
         attach(item: T): void;
@@ -28,16 +92,17 @@ declare module $data{
         detach(item: {}): void;
         remove(item: T): void;
         remove(item: {}): void;
-        elementType: T;
+        elementType: Ttype;
     }
-    class EntityContext{
+    
+    class EntityContext extends Base<EntityContext>{
         constructor(config?: any);
         onReady(): Promise<EntityContext>;
         saveChanges(): Promise<number>;
-
+        static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<EntityContext>;
     }
 
-    class Queryable<T extends Entity>{
+    class Queryable<T extends Entity | Edm.String>{
         filter(predicate: (it: T) => boolean, thisArg?: any): Queryable<T>;
         map(projection: (it: T) => any): Queryable<any>;
         orderBy(predicate: (it: any) => any): Queryable<T>;
@@ -53,17 +118,8 @@ declare module $data{
     }
     class ServiceAction{}
     class ServiceFunction{}
-}
-
-interface Thenable<R> {
-    then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): Thenable<U>;
-    then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => void): Thenable<U>;
-}
-declare class Promise<R> implements Thenable<R> {
-    constructor(callback: (resolve : (value?: R | Thenable<R>) => void, reject: (error?: any) => void) => void);
-    then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => U | Thenable<U>): Promise<U>;
-    then<U>(onFulfilled?: (value: R) => U | Thenable<U>, onRejected?: (error: any) => void): Promise<U>;
-    catch<U>(onRejected?: (error: any) => U | Thenable<U>): Promise<U>;
+    
+    function implementation(name:string): typeof Base;
 }
 
 declare module Edm {
@@ -100,4 +156,9 @@ declare module Edm {
     type GeometryMultiPolygon = $data.GeometryMultiPolygon;
     type GeometryMultiLineString = $data.GeometryMultiLineString;
     type GeometryCollection = $data.GeometryCollection;
+}
+
+declare module "jaydata/core"{
+    import $d = $data;
+    export = $d;
 }
