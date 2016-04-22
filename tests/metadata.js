@@ -575,7 +575,7 @@ describe("without jaydata", () => {
     it("typescript d.ts generation", () => {
         var schema = require('./schema2.json');
         var edmMetadata = new Edm.Edmx(schema);
-        var metadata = new Metadata({}, { generateTypes: false }, edmMetadata);
+        var metadata = new Metadata({}, { generateTypes: false, namespace: 'almafa' }, edmMetadata);
         var types = metadata.processMetadata();
 
         expect(types).to.have.length(0)

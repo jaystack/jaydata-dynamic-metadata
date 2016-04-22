@@ -463,6 +463,9 @@ export class Metadata {
             this.annotationHandler.preProcessAnnotation(d)
 
             var dtsm = dtsModules[d.namespace];
+            if (!dtsm){
+                dtsm = dtsModules[d.namespace] = ['declare module ' + d.namespace + ' {', '}'];
+            }
             var dtsPart = [];
 
             var srcPart = '';
@@ -526,7 +529,7 @@ export class Metadata {
                 return type
             }
         }));
-
+        
         types.src += 'var ctxType = exports.type;\n' +
             'exports.factory = function(config){\n' +
             '  if (ctxType){\n' +
@@ -549,7 +552,7 @@ export class Metadata {
         types.src += this.annotationHandler.annotationsText()
 
         types.src += '});';
-        types.dts += Object.keys(dtsModules).map(m => dtsModules[m].join('\n\n')).join('\n\n');
+        types.dts += Object.keys(dtsModules).filter(m => dtsModules[m] && dtsModules[m].length > 2).map(m => dtsModules[m].join('\n\n')).join('\n\n');
         
         if (contextFullName){
             types.dts += ['\n\ndeclare module "' + (this.options.contextName || 'JayDataContext') + '"{',
