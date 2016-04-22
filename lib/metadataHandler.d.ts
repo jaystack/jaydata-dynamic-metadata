@@ -1,4 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
 export declare class MetadataHandler {
     options: any;
     prepareRequest: Function;
