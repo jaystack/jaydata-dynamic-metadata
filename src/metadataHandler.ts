@@ -1,3 +1,4 @@
+/// <reference path="../typings/tsd.d.ts"/>
 import { Edm } from 'odata-v4-metadata'
 import { Metadata } from './metadata'
 import * as odatajs from 'jaydata-odatajs';
