@@ -102,18 +102,25 @@ declare module $data{
         static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<EntityContext>;
     }
 
-    class Queryable<T extends Entity | Edm.String>{
+    class Queryable<T extends Entity | Edm.Primitive>{
         filter(predicate: (it: T) => boolean, thisArg?: any): Queryable<T>;
+        filter(predicate: string, thisArg?: any): Queryable<T>;
         map(projection: (it: T) => any): Queryable<any>;
-        orderBy(predicate: (it: any) => any): Queryable<T>;
+        map(projection: string): Queryable<any>;
+        orderBy(predicate: (it: T) => void): Queryable<T>;
+        orderBy(predicate: string): Queryable<T>;
+        orderByDescending(predicate: (it: T) => void): Queryable<T>;
+        orderByDescending(predicate: string): Queryable<T>;
         include(selector: string): Queryable<T>;
         skip(amount: number): Queryable<T>;
         take(amount: number): Queryable<T>;
         forEach(handler: (it: T) => void): Promise<T>;
         length(): Promise<number>;
         toArray(): Promise<T[]>;
-        single(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void): Promise<T>;
-        first(predicate: (it: T) => boolean, params?: any, handler?: (result: T) => void ): Promise<T>;
+        single(predicate: (it: T) => boolean, params?: any): Promise<T>;
+        single(predicate: string, params?: any): Promise<T>;
+        first(predicate?: (it: T) => boolean, params?: any): Promise<T>;
+        first(predicate?: string, params?: any): Promise<T>;
         removeAll(): Promise<number>;
     }
     class ServiceAction{}
@@ -156,6 +163,11 @@ declare module Edm {
     type GeometryMultiPolygon = $data.GeometryMultiPolygon;
     type GeometryMultiLineString = $data.GeometryMultiLineString;
     type GeometryCollection = $data.GeometryCollection;
+    type Primitive =
+        Boolean | Binary | Guid | DateTime | DateTimeOffset | Duration | TimeOfDay | Date | Time |
+        Decimal | Single | Float | Double | Int16 | Int32 | Int64 | Byte | SByte | String |
+        GeographyPoint | GeographyLineString | GeographyPolygon | GeographyMultiPoint | GeographyMultiLineString | GeographyMultiPolygon | GeographyCollection |
+        GeometryPoint | GeometryLineString | GeometryPolygon | GeometryMultiPoint | GeometryMultiLineString | GeometryMultiPolygon | GeometryCollection;
 }
 
 declare module "jaydata/core"{
