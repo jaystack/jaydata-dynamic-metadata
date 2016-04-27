@@ -169,8 +169,3 @@ declare module Edm {
         GeographyPoint | GeographyLineString | GeographyPolygon | GeographyMultiPoint | GeographyMultiLineString | GeographyMultiPolygon | GeographyCollection |
         GeometryPoint | GeometryLineString | GeometryPolygon | GeometryMultiPoint | GeometryMultiLineString | GeometryMultiPolygon | GeometryCollection;
 }
-
-declare module "jaydata/core"{
-    import $d = $data;
-    export = $d;
-}

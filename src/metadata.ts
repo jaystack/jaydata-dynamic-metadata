@@ -555,10 +555,8 @@ export class Metadata {
         types.dts += Object.keys(dtsModules).filter(m => dtsModules[m] && dtsModules[m].length > 2).map(m => dtsModules[m].join('\n\n')).join('\n\n');
         
         if (contextFullName){
-            types.dts += ['\n\ndeclare module "' + (this.options.contextName || 'JayDataContext') + '"{',
-                '   export var type: typeof ' + contextFullName + ';',
-                '   export var factory:(config:any) => ' + contextFullName + ';',
-                '}'].join('\n');
+            types.dts += ['\n\nexport var type: typeof ' + contextFullName + ';',
+                'export var factory:(config:any) => ' + contextFullName + ';'].join('\n');
         }
 
         if (this.options.generateTypes === false) {
