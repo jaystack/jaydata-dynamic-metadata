@@ -555,8 +555,13 @@ export class Metadata {
         types.dts += Object.keys(dtsModules).filter(m => dtsModules[m] && dtsModules[m].length > 2).map(m => dtsModules[m].join('\n\n')).join('\n\n');
         
         if (contextFullName){
-            types.dts += ['\n\nexport var type: typeof ' + contextFullName + ';',
-                'export var factory:(config:any) => ' + contextFullName + ';'].join('\n');
+            var mod = ['\n\nexport var type: typeof ' + contextFullName + ';',
+                'export var factory: (config:any) => ' + contextFullName + ';'];
+            if (this.options.autoCreateContext){
+                var contextName = typeof this.options.autoCreateContext == 'string' ? this.options.autoCreateContext : 'context';
+                mod.push('export var ' + contextName + ': ' + contextFullName + ';');
+            }
+            types.dts += mod.join('\n');
         }
 
         if (this.options.generateTypes === false) {
