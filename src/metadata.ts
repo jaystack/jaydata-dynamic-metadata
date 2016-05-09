@@ -472,7 +472,7 @@ export class Metadata {
             if (d.baseType == '$data.Enum') {
                 dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends $data.Enum {');
                 if (d.params[3] && Object.keys(d.params[3]).length > 0){
-                    Object.keys(d.params[3]).forEach(dp => dtsPart.push('        static ' + d.params[3][dp].name));
+                    Object.keys(d.params[3]).forEach(dp => dtsPart.push('        static ' + d.params[3][dp].name + ': number'));
                 }
                 srcPart += 'types["' + d.params[0] + '"] = $data.createEnum("' + d.params[0] + '", [\n' +
                     Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +

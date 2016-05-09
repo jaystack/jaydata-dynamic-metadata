@@ -54,9 +54,9 @@ declare module $data{
         constructor();
         getType: () => typeof Base;
         
-        static addProperty(name:string, getterOrType:string | Function, setterOrGetter?:Function, setter?:Function);
-        static addMember(name:string, definition:any, isClassMember?:boolean);
-        static describeField(name:string, definition:any);
+        static addProperty(name:string, getterOrType:string | Function, setterOrGetter?:Function, setter?:Function): void;
+        static addMember(name:string, definition:any, isClassMember?:boolean): void;
+        static describeField(name:string, definition:any): void;
         
         static hasMetadata(key:string, property?:string): boolean;
         static getAllMetadata(property?:string): any;
