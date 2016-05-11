@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 export class Annotations {
     private includes: Array<any> = []
     private annotations: Array<any> = []
@@ -54,8 +52,8 @@ export class Annotations {
 
     preProcessAnnotation(typeDef) {
         this.annotations.forEach(annotationInfo => {
-            if(annotationInfo.typeName !== typeDef.typeName) return
-            
+            if (annotationInfo.typeName !== typeDef.typeName) return
+
             let property = annotationInfo.property
             let annotation = annotationInfo.annotation
 
@@ -99,8 +97,8 @@ export class Annotations {
 
     addAnnotation(type) {
         this.annotations.forEach(annotationInfo => {
-            if(type.fullName !== annotationInfo.typeName) return
-            
+            if (type.fullName !== annotationInfo.typeName) return
+
             let property = annotationInfo.property
             let annotation = annotationInfo.annotation
 
@@ -119,18 +117,19 @@ export class Annotations {
                 metadataKey = annotationInfo.qualifier + ':' + metadataKey
             }
 
-            if (property) {
-                Reflect.defineMetadata(metadataKey, value, annotationInfo.isStatic ? type : type.prototype, property)
-            } else {
-                Reflect.defineMetadata(metadataKey, value, annotationInfo.isStatic ? type : type.prototype)
+            if (typeof Reflect !== 'undefined' && typeof Reflect.defineMetadata === 'function') {
+                if (property) {
+                    Reflect.defineMetadata(metadataKey, value, annotationInfo.isStatic ? type : type.prototype, property)
+                } else {
+                    Reflect.defineMetadata(metadataKey, value, annotationInfo.isStatic ? type : type.prototype)
+                }
             }
-
         })
     }
-    
-    annotationsText(){
+
+    annotationsText() {
         var src = 'if (typeof Reflect !== "undefined" && typeof Reflect.defineMetadata === "function") {\n'
-        
+
         this.annotations.forEach(annotationInfo => {
             let property = annotationInfo.property
             let annotation = annotationInfo.annotation
@@ -158,7 +157,7 @@ export class Annotations {
             }
 
         })
-        
+
         src += '}\n\n'
         return src;
     }

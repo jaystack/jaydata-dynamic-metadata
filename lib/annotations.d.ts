@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 export declare class Annotations {
     private includes;
     private annotations;

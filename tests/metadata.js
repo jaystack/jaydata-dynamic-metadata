@@ -1,6 +1,6 @@
 /// <reference path="../lib/metadata.d.ts" />
 
-var Edm = require('odata-metadata').Edm
+var Edm = require('odata-v4-metadata').Edm
 var Metadata = require('../lib/metadata.js').Metadata
 var expect = require('chai').expect
 var $data = require('jaydata/core')
