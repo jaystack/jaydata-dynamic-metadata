@@ -8,7 +8,7 @@ export declare class DynamicMetadata {
     private $data;
     private static getParam;
     constructor($data: any);
-    service(serviceUri: any, config?: any, callback?: any): IPromise;
-    initService(serviceUri: any, config?: any, callback?: any): IPromise;
+    service(serviceUri: any, config?: any, callback?: any): any;
+    initService(serviceUri: any, config?: any, callback?: any): any;
     static use($data: any): void;
 }

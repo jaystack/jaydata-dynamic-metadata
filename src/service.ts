@@ -45,7 +45,7 @@ export class DynamicMetadata{
 			params.config.url = serviceUri;
 		}
 
-		var pHandler = new PromiseHandler();
+		var pHandler = this.$data && this.$data.PromiseHandler ? this.$data.PromiseHandler : new PromiseHandler();
     	var _callback = pHandler.createCallback(params.callback);
 
 		var self = this;
@@ -77,7 +77,7 @@ export class DynamicMetadata{
 			params.config.url = serviceUri;
 		}
 
-		var pHandler = new PromiseHandler();
+        var pHandler = this.$data && this.$data.PromiseHandler ? this.$data.PromiseHandler : new PromiseHandler();
     	var _callback = pHandler.createCallback(params.callback);
 
 		this.service(params.config.url, params.config, {
