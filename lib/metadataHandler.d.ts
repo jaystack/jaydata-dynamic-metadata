@@ -1,4 +1,5 @@
 /// <reference path="../typings/tsd.d.ts" />
+export declare var odatajs: any;
 export declare class MetadataHandler {
     options: any;
     prepareRequest: Function;

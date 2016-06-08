@@ -1,4 +1,4 @@
-export { MetadataHandler } from './metadataHandler';
+export { MetadataHandler, odatajs } from './metadataHandler';
 export declare class ServiceParams {
     serviceUri: string;
     config: any;

@@ -12,7 +12,7 @@
     "iPhone",
     "Android"
   ],
-  "version": "0.1.13",
+  "version": "0.1.14",
   "homepage": "http://jaydata.org",
   "author": {
     "name": "JayData",
@@ -21,7 +21,7 @@
   "dependencies": {
     "extend": "^3.0.0",
     "jaydata-error-handler": "^0.0.1",
-    "jaydata-odatajs": "^4.0.0",
+    "jaydata-odatajs": "^4.0.1",
     "jaydata-promise-handler": "^0.0.1",
     "odata-v4-metadata": "^0.1.3"
   },

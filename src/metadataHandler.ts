@@ -1,8 +1,10 @@
 /// <reference path="../typings/tsd.d.ts"/>
 import { Edm } from 'odata-v4-metadata'
 import { Metadata } from './metadata'
-import * as odatajs from 'jaydata-odatajs';
+import * as _odatajs from 'jaydata-odatajs';
 import * as extend from 'extend';
+
+export var odatajs = _odatajs;
 
 export class MetadataHandler{
 	options:any
