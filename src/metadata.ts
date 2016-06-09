@@ -470,9 +470,9 @@ export class Metadata {
 
             var srcPart = '';
             if (d.baseType == '$data.Enum') {
-                dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends $data.Enum {');
+                dtsPart.push('    export enum ' + d.typeName.split('.').pop() + ' {');
                 if (d.params[3] && Object.keys(d.params[3]).length > 0){
-                    Object.keys(d.params[3]).forEach(dp => dtsPart.push('        static ' + d.params[3][dp].name + ': number'));
+                    Object.keys(d.params[3]).forEach(dp => dtsPart.push('        ' + d.params[3][dp].name + ','));
                 }
                 srcPart += 'types["' + d.params[0] + '"] = $data.createEnum("' + d.params[0] + '", [\n' +
                     Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +
