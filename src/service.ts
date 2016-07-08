@@ -84,7 +84,11 @@ export class DynamicMetadata{
 	        success: function(factory){
 	            var ctx = factory()
 	            if(ctx){
-	                return ctx.onReady(_callback);
+					return ctx.onReady().then((ctx) => {
+						ctx.factory = factory;
+						ctx.type = factory.type;
+						_callback.success(ctx, factory, factory.type);
+					}, _callback.error);
 	            }
 	            return _callback.error(new Exception("Missing Context Type"))
 	        },

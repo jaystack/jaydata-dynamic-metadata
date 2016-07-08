@@ -40,7 +40,7 @@ export class MetadataHandler{
 		return new Promise<any>(function(resolve, reject){
 			var serviceUrl:string = self.options.url.replace('/$metadata', '')
 	        var metadataUrl:string = serviceUrl.replace(/\/+$/, '') + '/$metadata'
-	        self.options.serivceUri = serviceUrl;
+	        self.options.serviceUri = serviceUrl;
 
 			var requestData = [
 	            {
