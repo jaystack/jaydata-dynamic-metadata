@@ -129,11 +129,15 @@ declare module $data{
     function implementation(name:string): typeof Base;
 }
 
+declare module JavaScript {
+    type _Date = Date;
+}
+
 declare module Edm {
     type Boolean = boolean;
     type Binary = Uint8Array;
-    type DateTime = Date;
-    type DateTimeOffset = Date;
+    type DateTime = JavaScript._Date;
+    type DateTimeOffset = JavaScript._Date;
     type Duration = string;
     type TimeOfDay = string;
     type Date = string;
