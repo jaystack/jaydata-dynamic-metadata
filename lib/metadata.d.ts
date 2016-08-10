@@ -3,6 +3,7 @@ export declare class Metadata {
     metadata: any;
     private $data;
     private annotationHandler;
+    private storedTypes;
     constructor($data: any, options: any, metadata: any);
     _getMaxValue(maxValue: any): any;
     createTypeDefinition(propertySchema: any, definition: any): void;
@@ -58,4 +59,6 @@ export declare class Metadata {
     private _createPropertyDefString(definition);
     private _typeToTS(type, elementType, definition);
     orderTypeDefinitions(typeDefinitions: any): any[];
+    private storeExportable(typesStr);
+    private addExportables(meta);
 }

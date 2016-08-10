@@ -99,6 +99,7 @@ declare module $data{
         constructor(config?: any);
         onReady(): Promise<EntityContext>;
         saveChanges(): Promise<number>;
+        stateManager: {reset: Function};
         static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<EntityContext>;
     }
 
@@ -128,6 +129,7 @@ declare module $data{
     
     function implementation(name:string): typeof Base;
 }
+export { $data as $data }
 
 declare module Edm {
     type Boolean = boolean;

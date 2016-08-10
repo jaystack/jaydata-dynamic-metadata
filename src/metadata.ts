@@ -64,6 +64,7 @@ export class Metadata {
     metadata: any
     private $data: any
     private annotationHandler: Annotations
+    private storedTypes: Object;
     constructor($data: any, options: any, metadata: any) {
         this.$data = $data;
         this.options = options || {};
@@ -76,6 +77,8 @@ export class Metadata {
         this.options.collectionBaseType = this.options.collectionBaseType || 'Array'
 
         this.annotationHandler = new Annotations()
+
+        this.storedTypes = {};
     }
 
     _getMaxValue(maxValue) {
@@ -457,6 +460,7 @@ export class Metadata {
             '  if (typeof define == "function" && define.amd) return define(["exports", "jaydata/core"], mod); // AMD\n' +
             '  mod($data.generatedContext || ($data.generatedContext = {}), $data); // Plain browser env\n' +
             '})(function(exports, $data) {\n\n' +
+            'exports.$data = $data;\n\n' +
             'var types = {};\n\n';
         typeDefinitions = this.orderTypeDefinitions(typeDefinitions)
         types.push(...typeDefinitions.map((d) => {
@@ -478,6 +482,7 @@ export class Metadata {
                     Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +
                     '\n]);\n\n';
             } else {
+                this.storeExportable( d.params[0] );
                 dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends ' + d.baseType + ' {');
                 if (d.baseType == self.options.contextType){
                     dtsPart.push('        onReady(): Promise<' + d.typeName.split('.').pop() + '>;');
@@ -530,6 +535,8 @@ export class Metadata {
             }
         }));
         
+        this.addExportables( types );
+
         types.src += 'var ctxType = exports.type;\n' +
             'exports.factory = function(config){\n' +
             '  if (ctxType){\n' +
@@ -552,7 +559,16 @@ export class Metadata {
         types.src += this.annotationHandler.annotationsText()
 
         types.src += '});';
-        types.dts += Object.keys(dtsModules).filter(m => dtsModules[m] && dtsModules[m].length > 2).map(m => dtsModules[m].join('\n\n')).join('\n\n');
+
+        types.dts += Object.keys(dtsModules)
+            .filter(m => dtsModules[m] && dtsModules[m].length > 2)
+            .map(m => 
+            {
+                let exportableTSD = m.split(".")[0];
+                return dtsModules[m].join('\n\n') + 
+                    '\nexport {'+exportableTSD+' as '+exportableTSD+'}'; 
+            })
+            .join('\n\n');
         
         if (contextFullName){
             var mod = ['\n\nexport var type: typeof ' + contextFullName + ';',
@@ -622,5 +638,41 @@ export class Metadata {
         }
 
         return ordered.concat(contextTypes);
+    }
+
+    private storeExportable( typesStr )
+    {
+        let typesArr = typesStr.split(".");
+        let container = this.storedTypes;
+
+        typesArr.forEach(( current )=>
+        {
+            if(typesArr[typesArr.length-1] === current)
+            {
+                container[current] = "@@" + typesStr+"@@";
+            }
+            else
+            {
+                if( !container[current] )
+                {
+                    container[current] = {};
+                }
+
+                container = container[current];
+            }
+        });
+    }
+
+    private addExportables( meta )
+    {
+        for( let key in this.storedTypes )
+        {
+            let types = "exports." + key + " = " +
+                JSON.stringify(this.storedTypes[key], null, 2)
+                .replace(/"@@/g,"types[\"")
+                .replace(/@@"/g,"\"]") + ";\n\n";
+
+            meta.src += types
+        }
     }
 }
