@@ -14,7 +14,7 @@ declare module $data{
     class GeometryMultiPolygon{}
     class GeometryMultiLineString{}
     class GeometryCollection{}
-    
+
     const enum EntityState{
         Detached = 0,
         Unchanged = 10,
@@ -22,7 +22,7 @@ declare module $data{
         Modified = 30,
         Deleted = 40
     }
-    
+
     interface MemberDefinition{
         name: string;
         type: any;
@@ -43,7 +43,7 @@ declare module $data{
         storeOnObject: boolean;
         monitorChanges: boolean;
     }
-    
+
     interface Event{
         attach(eventHandler: (sender: any, event: any) => void ): void;
         detach(eventHandler: () => void ): void;
@@ -53,34 +53,34 @@ declare module $data{
     class Base<T>{
         constructor();
         getType: () => typeof Base;
-        
+
         static addProperty(name:string, getterOrType:string | Function, setterOrGetter?:Function, setter?:Function): void;
         static addMember(name:string, definition:any, isClassMember?:boolean): void;
         static describeField(name:string, definition:any): void;
-        
+
         static hasMetadata(key:string, property?:string): boolean;
         static getAllMetadata(property?:string): any;
         static getMetadata(key:string, property?:string): any;
         static setMetadata(key:string, value:any, property?:string): void;
     }
-    
+
     class Enum extends Base<Enum>{
         static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<Enum>;
     }
     function createEnum(name:string, enumType:any, enumDefinition?:any): Base<Enum>;
-    
+
     class Entity extends Base<Entity>{
         static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<Entity>;
-        
+
         entityState: EntityState;
         changedProperties: MemberDefinition[];
-        
+
         propertyChanging: Event;
         propertyChanged: Event;
         propertyValidationError: Event;
         isValid: boolean;
     }
-    
+
     class EntitySet<Ttype extends typeof Entity, T extends Entity> extends Queryable<T>{
         add(item: T): T;
         add(initData: {}): T;
@@ -94,7 +94,7 @@ declare module $data{
         remove(item: {}): void;
         elementType: Ttype;
     }
-    
+
     class EntityContext extends Base<EntityContext>{
         constructor(config?: any);
         onReady(): Promise<EntityContext>;
@@ -126,16 +126,18 @@ declare module $data{
     }
     class ServiceAction{}
     class ServiceFunction{}
-    
+
     function implementation(name:string): typeof Base;
 }
-export { $data as $data }
+export {$data as $data}
+
+declare type JSDate = Date;
 
 declare module Edm {
     type Boolean = boolean;
     type Binary = Uint8Array;
-    type DateTime = Date;
-    type DateTimeOffset = Date;
+    type DateTime = JSDate;
+    type DateTimeOffset = JSDate;
     type Duration = string;
     type TimeOfDay = string;
     type Date = string;
@@ -171,3 +173,4 @@ declare module Edm {
         GeographyPoint | GeographyLineString | GeographyPolygon | GeographyMultiPoint | GeographyMultiLineString | GeographyMultiPolygon | GeographyCollection |
         GeometryPoint | GeometryLineString | GeometryPolygon | GeometryMultiPoint | GeometryMultiLineString | GeometryMultiPolygon | GeometryCollection;
 }
+export {Edm as Edm}
