@@ -23,6 +23,12 @@ declare module $data{
         Deleted = 40
     }
 
+    class EntityAttachMode{
+        static Default: Function
+        static AllChanged: Function
+        static KeepChanges: Function
+    }
+
     interface MemberDefinition{
         name: string;
         type: any;
@@ -71,6 +77,7 @@ declare module $data{
 
     class Entity extends Base<Entity>{
         static extend(name:string, instanceDefinition:any, classDefinition?:any): Base<Entity>;
+        getProperty<T>(property:string): Promise<T>;
 
         entityState: EntityState;
         changedProperties: MemberDefinition[];
@@ -84,8 +91,8 @@ declare module $data{
     class EntitySet<Ttype extends typeof Entity, T extends Entity> extends Queryable<T>{
         add(item: T): T;
         add(initData: {}): T;
-        attach(item: T): void;
-        attach(item: {}): void;
+        attach(item: T, mode?:string | Function): void;
+        attach(item: {}, mode?:string | Function): void;
         attachOrGet(item: T): T;
         attachOrGet(item: {}): T;
         detach(item: T): void;

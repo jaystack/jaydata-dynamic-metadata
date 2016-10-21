@@ -139,6 +139,13 @@ export class Metadata {
             }
         })
 
+        containsField(propertySchema, "storeGeneratedPattern", v => {
+            if (v == "Identity"){
+                definition.computed = true
+                definition.required = false
+            }
+        })
+
         containsField(propertySchema, "annotations", v => {
             this.annotationHandler.processEntityPropertyAnnotations(entityFullName, propertySchema.name, v)
         })
@@ -167,6 +174,39 @@ export class Metadata {
         containsField(propertySchema, "partner", p => {
             definition.inverseProperty = p
         })
+
+        containsField(propertySchema, "relationship", p => {
+            var namespace = p.slice(0, p.lastIndexOf("."));
+            var name = p.slice(p.lastIndexOf(".") + 1);
+
+            var inverse = null;
+            for (var i = 0; i < entitySchema.parent.entityTypes.length; i++){
+                var entityType = entitySchema.parent.entityTypes[i];
+                if (entityType == entitySchema) continue;
+                inverse = entityType.navigationProperties.filter((prop) => prop.relationship == p && prop.fromRole == propertySchema.toRole)[0] || null;
+                if (inverse) break;
+            }
+
+            for (var i = 0; i < entitySchema.parent.associations.length; i++){
+                var association = entitySchema.parent.associations[i];
+                if (association && association.name == name){
+                    var end = association.ends.filter(end => end.role == propertySchema.toRole)[0];
+                    if (end){
+                        if (end.multiplicity == "*"){
+                            definition.type = "Array";
+                            definition.elementType = end.type;
+                        }else if (end.multiplicity == "1"){
+                            definition.type = end.type;
+                            definition.required = true;
+                        }else{
+                            definition.type = end.type;
+                        }
+                    }
+                }
+            }
+
+            if (inverse) definition.inverseProperty = inverse.name;
+        });
 
         if (!definition.inverseProperty) {
             definition.inverseProperty = '$$unbound'
@@ -534,17 +574,18 @@ export class Metadata {
                 return type
             }
         }));
-        
+
         this.addExportables( types );
 
         types.src += 'var ctxType = exports.type;\n' +
             'exports.factory = function(config){\n' +
             '  if (ctxType){\n' +
             '    var cfg = $data.typeSystem.extend({\n' +
-            '      name: "oData",\n' +
+            '      name: "' + ((this.options.maxDataServiceVersion || this.metadata.dataServices.dataServiceVersion) < '4.0' ? 'oDataV3' : 'oData') + '",\n' +
             '      oDataServiceHost: "' + (this.options.url && this.options.url.replace('/$metadata', '') || '') + '",\n' +
             '      withCredentials: ' + (this.options.withCredentials || false) + ',\n' +
-            '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || '4.0') + '"\n' +
+            '      maxDataServiceVersion: "' + (this.options.maxDataServiceVersion || this.metadata.dataServices.maxDataServiceVersion || '4.0') + '"' +
+            (this.metadata.dataServices.dataServiceVersion ? ',\n      dataServiceVersion: "' + this.metadata.dataServices.dataServiceVersion + '"\n' : '\n') +
             '    }, config);\n' +
             '    return new ctxType(cfg);\n' +
             '  }else{\n' +
@@ -562,14 +603,14 @@ export class Metadata {
 
         types.dts += Object.keys(dtsModules)
             .filter(m => dtsModules[m] && dtsModules[m].length > 2)
-            .map(m => 
+            .map(m =>
             {
                 let exportableTSD = m.split(".")[0];
-                return dtsModules[m].join('\n\n') + 
-                    '\nexport {'+exportableTSD+' as '+exportableTSD+'}'; 
+                return dtsModules[m].join('\n\n') +
+                    '\nexport {'+exportableTSD+' as '+exportableTSD+'}';
             })
             .join('\n\n');
-        
+
         if (contextFullName){
             var mod = ['\n\nexport var type: typeof ' + contextFullName + ';',
                 'export var factory: (config:any) => ' + contextFullName + ';'];
