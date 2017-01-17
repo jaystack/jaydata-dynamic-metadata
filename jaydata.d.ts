@@ -123,6 +123,7 @@ declare module $data{
         first(predicate?: (it: T) => boolean, params?: any): Promise<T>;
         first(predicate?: string, params?: any): Promise<T>;
         removeAll(): Promise<number>;
+        count(): Promise<number>;
     }
     class ServiceAction{}
     class ServiceFunction{}
