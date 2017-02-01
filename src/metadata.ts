@@ -465,6 +465,7 @@ export class Metadata {
         typeDefinitions = this.orderTypeDefinitions(typeDefinitions)
         types.push(...typeDefinitions.map((d) => {
             this.annotationHandler.preProcessAnnotation(d)
+            this.storeExportable( d.params[0] );
 
             var dtsm = dtsModules[d.namespace];
             if (!dtsm){
@@ -482,7 +483,6 @@ export class Metadata {
                     Object.keys(d.params[3]).map(dp => '  ' + this._createPropertyDefString(d.params[3][dp])).join(',\n') +
                     '\n]);\n\n';
             } else {
-                this.storeExportable( d.params[0] );
                 dtsPart.push('    export class ' + d.typeName.split('.').pop() + ' extends ' + d.baseType + ' {');
                 if (d.baseType == self.options.contextType){
                     dtsPart.push('        onReady(): Promise<' + d.typeName.split('.').pop() + '>;');
@@ -534,7 +534,7 @@ export class Metadata {
                 return type
             }
         }));
-        
+
         this.addExportables( types );
 
         types.src += 'var ctxType = exports.type;\n' +
@@ -560,16 +560,20 @@ export class Metadata {
 
         types.src += '});';
 
+        // declare modules
         types.dts += Object.keys(dtsModules)
             .filter(m => dtsModules[m] && dtsModules[m].length > 2)
-            .map(m => 
-            {
-                let exportableTSD = m.split(".")[0];
-                return dtsModules[m].join('\n\n') + 
-                    '\nexport {'+exportableTSD+' as '+exportableTSD+'}'; 
-            })
+            .map(m => dtsModules[m].join('\n\n'))
             .join('\n\n');
-        
+
+        // export modules
+        types.dts += Object.keys(dtsModules)
+            .filter(m => dtsModules[m] && dtsModules[m].length > 2)
+            .map(m => m.split(".")[0])
+            .filter((v, i, a) => a.indexOf(v) === i) // distinct
+            .map(m => '\n\nexport {'+m+' as '+m+'}')
+            .join('');
+
         if (contextFullName){
             var mod = ['\n\nexport var type: typeof ' + contextFullName + ';',
                 'export var factory: (config:any) => ' + contextFullName + ';'];
