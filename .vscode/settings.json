@@ -1,7 +1,0 @@
-// Place your settings in this file to overwrite default and user settings.
-{
-    "editor.trimAutoWhitespace": true,
-    "files.trimTrailingWhitespace": true,
-    "diffEditor.ignoreTrimWhitespace": true,
-    "editor.renderWhitespace": false
-}

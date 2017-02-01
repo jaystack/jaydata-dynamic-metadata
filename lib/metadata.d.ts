@@ -5,7 +5,7 @@ export declare class Metadata {
     private annotationHandler;
     private storedTypes;
     constructor($data: any, options: any, metadata: any);
-    _getMaxValue(maxValue: any): any;
+    _getMaxValue(maxValue: any): number;
     createTypeDefinition(propertySchema: any, definition: any): void;
     createReturnTypeDefinition(propertySchema: any, definition: any): void;
     createProperty(entityFullName: any, entitySchema: any, propertySchema: any): {
