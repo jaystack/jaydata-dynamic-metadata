@@ -7,7 +7,7 @@ export declare class Annotations {
     processEntitySetAnnotations(typeName: any, annotations: any, isStatic?: boolean): void;
     processSchemaAnnotations(target: any, annotations: any, qualifier: any, isStatic?: boolean): void;
     preProcessAnnotation(typeDef: any): void;
-    processedAnnotations: Object;
+    static processedAnnotations: Object;
     addAnnotation(type: any): void;
     annotationsText(): string;
     resolveAnnotationTypeAlias(term: any): any;

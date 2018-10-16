@@ -3,6 +3,8 @@ import { MetadataHandler } from './metadataHandler';
 import { Exception } from 'jaydata-error-handler';
 import { PromiseHandler } from 'jaydata-promise-handler';
 export { MetadataHandler, odatajs } from './metadataHandler';
+export { Annotations } from './annotations';
+export { Metadata } from './metadata';
 
 export class ServiceParams{
 	public serviceUri:string

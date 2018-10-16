@@ -65,13 +65,13 @@ export class Annotations {
                 metadataKey = annotationInfo.qualifier + ':' + metadataKey
             }
 
-            if (typeof this.processedAnnotations[metadataKey] === 'function') {
-                this.processedAnnotations[metadataKey](annotationInfo, typeDef);
+            if (typeof Annotations.processedAnnotations[metadataKey] === 'function') {
+                Annotations.processedAnnotations[metadataKey](annotationInfo, typeDef);
             }
         })
     }
 
-    processedAnnotations: Object = {
+    static processedAnnotations: Object = {
         "Org.OData.Core.V1.Computed": function(annotationInfo, typeDef) {
             if (typeDef.definition && annotationInfo.property && typeDef.definition[annotationInfo.property]) {
                 var propDef = typeDef.definition[annotationInfo.property]

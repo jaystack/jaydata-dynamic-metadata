@@ -1,4 +1,6 @@
 export { MetadataHandler, odatajs } from './metadataHandler';
+export { Annotations } from './annotations';
+export { Metadata } from './metadata';
 export declare class ServiceParams {
     serviceUri: string;
     config: any;
