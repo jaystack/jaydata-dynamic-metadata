@@ -161,7 +161,7 @@ export class Metadata {
 
         containsField(propertySchema, "nullable", v => {
             definition.nullable = parsebool(v, true),
-                definition.required = parsebool(v, true) === false
+            definition.required = parsebool(v, true) === false
         })
 
         containsField(propertySchema, "partner", p => {
@@ -171,6 +171,13 @@ export class Metadata {
         if (!definition.inverseProperty) {
             definition.inverseProperty = '$$unbound'
         }
+
+        containsField(propertySchema, "referentialConstraints", p => {
+            if (p.length) {
+                definition.keys = p.map(r => r.property)
+                definition.foreignKeys = p.map(r => r.referencedProperty)
+            }
+        })
 
         containsField(propertySchema, "annotations", v => {
             this.annotationHandler.processEntityPropertyAnnotations(entityFullName, propertySchema.name, v)
